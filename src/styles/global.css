@@ -1,0 +1,235 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+	--font-sans:
+		'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial,
+		sans-serif;
+	--color-sunat-red: #d91009;
+	--color-sunat-red-dark: #b00d07;
+	--color-sunat-magenta: #ae0d41;
+	--color-sunat-blue: #0056ac;
+	--color-sunat-blue-dark: #003f7e;
+	--color-sunat-green: #2e7d32;
+	--color-sunat-ink: #1f2937;
+}
+
+@layer base {
+	:root {
+		color-scheme: light;
+	}
+
+	.dark {
+		color-scheme: dark;
+	}
+
+	html {
+		scroll-behavior: smooth;
+		@apply bg-white dark:bg-slate-950;
+	}
+
+	body {
+		@apply bg-white font-sans text-slate-800 antialiased dark:bg-slate-950 dark:text-slate-100;
+	}
+
+	:focus-visible {
+		outline: 3px solid var(--color-sunat-blue);
+		outline-offset: 2px;
+		border-radius: 4px;
+	}
+
+	.dark :focus-visible {
+		outline-color: #7dd3fc;
+	}
+
+	::selection {
+		background: #cfe3f7;
+		color: #003f7e;
+	}
+
+	.dark ::selection {
+		background: #0c4a6e;
+		color: #e0f2fe;
+	}
+}
+
+@utility container-sunat {
+	@apply mx-auto w-full max-w-6xl px-4;
+}
+
+@utility link-sunat {
+	@apply font-semibold text-sunat-blue underline decoration-sunat-blue/40 underline-offset-2 transition hover:text-sunat-blue-dark hover:decoration-sunat-blue dark:text-sky-400 dark:decoration-sky-400/40 dark:hover:text-sky-300 dark:hover:decoration-sky-300;
+}
+
+nav[aria-label='Menú principal'] [data-nav-link][aria-current='location'] {
+	border-color: var(--color-sunat-magenta);
+	color: var(--color-sunat-magenta);
+}
+
+#menu-movil [data-nav-link][aria-current='location'] {
+	background-color: #f0f9ff;
+	color: var(--color-sunat-blue);
+}
+
+.dark nav[aria-label='Menú principal'] [data-nav-link][aria-current='location'] {
+	border-color: #fb7185;
+	color: #fda4af;
+}
+
+.dark #menu-movil [data-nav-link][aria-current='location'] {
+	background-color: rgb(12 74 110 / 0.45);
+	color: #7dd3fc;
+}
+
+.dark [role='tab'][aria-selected='true'] {
+	border-color: #fb7185;
+	color: #fda4af;
+}
+
+.dark .quick-card-help {
+	color: #94a3b8;
+}
+
+@keyframes sunat-hop {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	45%,
+	55% {
+		transform: translateY(-10px);
+	}
+}
+
+@utility animate-hop {
+	animation: sunat-hop 2.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.animate-hop {
+		animation: none;
+	}
+}
+
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+	transition:
+		background-color 300ms ease,
+		border-color 300ms ease,
+		color 300ms ease,
+		fill 300ms ease,
+		stroke 300ms ease,
+		box-shadow 300ms ease !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	html.theme-transition *,
+	html.theme-transition *::before,
+	html.theme-transition *::after {
+		transition: none !important;
+	}
+}
+
+.field-invalid {
+	border-color: #dc2626;
+	background-color: #fef2f2;
+	color: #7f1d1d;
+}
+
+.field-invalid::placeholder {
+	color: #991b1b;
+	opacity: 0.55;
+}
+
+.field-invalid:focus-visible {
+	outline-color: #dc2626;
+}
+
+.dark .field-invalid {
+	border-color: #f87171;
+	background-color: rgb(69 10 10 / 0.35);
+	color: #fecaca;
+}
+
+.dark .field-invalid::placeholder {
+	color: #fca5a5;
+	opacity: 0.7;
+}
+
+.dark .field-invalid:focus-visible {
+	outline-color: #f87171;
+}
+
+.field-valid {
+	border-color: #059669;
+	background-color: #ecfdf5;
+	color: #064e3b;
+}
+
+.field-valid:focus-visible {
+	outline-color: #059669;
+}
+
+.dark .field-valid {
+	border-color: #34d399;
+	background-color: rgb(6 78 59 / 0.35);
+	color: #a7f3d0;
+}
+
+.dark .field-valid:focus-visible {
+	outline-color: #34d399;
+}
+
+#documento-estado[data-state='error'] {
+	color: #b91c1c;
+}
+
+.dark #documento-estado[data-state='error'] {
+	color: #fca5a5;
+}
+
+#documento-estado[data-state='success'] {
+	color: #047857;
+}
+
+.dark #documento-estado[data-state='success'] {
+	color: #6ee7b7;
+}
+
+#login-feedback[data-state='error'] {
+	border-color: #fecaca;
+	background-color: #fef2f2;
+	color: #7f1d1d;
+}
+
+.dark #login-feedback[data-state='error'] {
+	border-color: #7f1d1d;
+	background-color: rgb(69 10 10 / 0.4);
+	color: #fecaca;
+}
+
+.skip-link {
+	position: fixed;
+	top: 0.5rem;
+	left: 0.5rem;
+	z-index: 100;
+	transform: translateY(-200%);
+	border-radius: 0.5rem;
+	background: #fff;
+	padding: 0.75rem 1rem;
+	font-weight: 700;
+	color: var(--color-sunat-blue);
+	box-shadow: 0 8px 24px rgb(0 0 0 / 0.2);
+	transition: transform 0.15s ease-in-out;
+}
+
+.dark .skip-link {
+	background: #0f172a;
+	color: #7dd3fc;
+}
+
+.skip-link:focus {
+	transform: translateY(0);
+}

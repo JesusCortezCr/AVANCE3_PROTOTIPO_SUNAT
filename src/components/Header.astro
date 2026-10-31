@@ -1,0 +1,313 @@
+---
+import Icon from './Icon.astro';
+import ThemeToggle from './ThemeToggle.astro';
+
+const navItems = [
+	{ label: 'Trámites y servicios', href: '#tramites-y-servicios' },
+	{ label: 'Campañas', href: '#campanas' },
+	{ label: 'Canales de atención y redes sociales', href: '#contacto' },
+	{ label: 'Noticias', href: '#noticias' },
+	{ label: 'Información institucional', href: '#informacion-institucional' },
+	{ label: 'Informes y publicaciones', href: '#informes' },
+	{ label: 'Enlaces de interés', href: '#enlaces-de-interes' },
+];
+---
+
+<header class="bg-sunat-red text-white dark:bg-sunat-red-dark">
+	<div class="container-sunat flex flex-wrap items-center gap-x-6 gap-y-4 py-3">
+		<a
+			href="/"
+			class="flex items-center gap-3 rounded-md focus-visible:outline-white"
+			aria-label="gob.pe y SUNAT, ir al inicio"
+		>
+			<img
+				src="/img/escudo_blanco.1b27b421.svg"
+				alt=""
+				width="92"
+				height="32"
+				class="h-8 w-auto"
+			/>
+			<img
+				src="/img/gobpe_blanco.b8dd3ffa.svg"
+				alt="gob.pe"
+				width="82"
+				height="20"
+				class="hidden h-5 w-auto sm:block"
+			/>
+			<span class="hidden h-8 w-px bg-white/40 md:block"></span>
+			<span class="hidden flex-col text-[11px] leading-tight text-white md:flex">
+				Plataforma digital única
+				<br />del Estado Peruano
+			</span>
+			<span class="hidden text-lg font-black tracking-tight lg:block">SUNAT</span>
+		</a>
+
+		<div class="ml-auto flex items-center gap-2 lg:hidden">
+			<ThemeToggle compact />
+			<button
+				type="button"
+				class="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-white/40 text-white transition hover:bg-white/10"
+				aria-expanded="false"
+				aria-controls="menu-movil"
+				aria-label="Abrir menú"
+				data-menu-toggle
+			>
+				<Icon name="menu" size={22} />
+			</button>
+		</div>
+
+		<div
+			class="order-3 flex w-full flex-col gap-2 sm:flex-row sm:items-center lg:order-none lg:ml-auto lg:w-auto"
+		>
+			<form
+				action="https://www.gob.pe/busquedas"
+				method="get"
+				role="search"
+				class="w-full min-w-0 sm:flex-1 lg:w-[340px] lg:flex-none"
+			>
+				<label for="buscador-sunat" class="sr-only">Buscar en SUNAT</label>
+				<div class="relative">
+					<input
+						id="buscador-sunat"
+						type="search"
+						name="term"
+						placeholder="Buscar en SUNAT"
+						class="h-11 w-full rounded-lg border-0 bg-white pl-4 pr-12 text-sm text-slate-900 placeholder:text-slate-500"
+					/>
+					<input type="hidden" name="institucion[]" value="sunat" />
+					<button
+						type="submit"
+						class="absolute inset-y-1 right-1 grid w-9 cursor-pointer place-items-center rounded-md bg-slate-900 text-white transition hover:bg-slate-700"
+					>
+						<Icon name="search" size={19} />
+						<span class="sr-only">Buscar en SUNAT</span>
+					</button>
+				</div>
+			</form>
+
+			<div class="flex flex-col items-start gap-1 sm:shrink-0 sm:items-end">
+				<div class="flex w-full items-center gap-2 sm:w-auto">
+					<div class="hidden lg:block">
+						<ThemeToggle />
+					</div>
+					<a
+						href="/login"
+						class="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-lg border border-white/40 bg-white px-4 text-sm font-bold text-sunat-red shadow-sm transition hover:bg-red-50 focus-visible:outline-white sm:flex-none"
+					>
+						<Icon name="network" size={18} />
+						Iniciar sesión
+					</a>
+				</div>
+				<p class="inline-flex items-center gap-1.5 text-[11px] font-medium text-white">
+					<span class="h-1.5 w-1.5 rounded-full bg-amber-300" aria-hidden="true"></span>
+					Sin sesión iniciada
+				</p>
+			</div>
+		</div>
+	</div>
+</header>
+
+<nav
+	aria-label="Menú principal"
+	class="sticky top-0 z-40 hidden border-b border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:shadow-slate-950/60 lg:block"
+>
+	<div class="container-sunat">
+		<ul class="flex items-stretch justify-between">
+			{
+				navItems.map((item, index) => (
+					<li class="flex-1">
+						<a
+							href={item.href}
+							data-nav-link
+							aria-current={index === 0 ? 'location' : undefined}
+							class="flex h-full items-center justify-center border-b-[3px] border-transparent px-2 py-4 text-center text-[13px] font-semibold text-slate-700 transition hover:border-sunat-blue/30 hover:bg-sky-50 hover:text-sunat-blue dark:text-slate-300 dark:hover:border-sky-500/40 dark:hover:bg-slate-900 dark:hover:text-sky-300"
+						>
+							{item.label}
+						</a>
+					</li>
+				))
+			}
+		</ul>
+	</div>
+</nav>
+
+<nav
+	id="menu-movil"
+	aria-label="Menú principal móvil"
+	class="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 lg:hidden"
+	hidden
+>
+	<ul class="container-sunat grid gap-1 py-3">
+		{
+			navItems.map((item, index) => (
+				<li>
+					<a
+						href={item.href}
+						data-nav-link
+						aria-current={index === 0 ? 'location' : undefined}
+						class="flex items-center justify-between rounded-lg px-3 py-3 text-sm font-semibold text-slate-700 transition hover:bg-sky-50 hover:text-sunat-blue dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-sky-300"
+					>
+						{item.label}
+						<Icon name="chevron-right" size={16} />
+					</a>
+				</li>
+			))
+		}
+	</ul>
+</nav>
+
+<aside aria-label="Estado de la sesión" class="border-b border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/40">
+	<div class="container-sunat flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+		<p class="flex items-start gap-2 text-sm text-amber-950 dark:text-amber-100">
+			<Icon name="info" size={18} class="mt-0.5 shrink-0 text-amber-700 dark:text-amber-300" />
+			<span>
+				<strong class="font-bold">No has iniciado sesión.</strong>
+				Puedes explorar trámites y servicios. Entra con tu Clave SOL para ver tus datos
+				personales.
+			</span>
+		</p>
+		<a
+			href="/login"
+			class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-amber-900 px-4 py-2 text-sm font-bold text-white transition hover:bg-amber-950 focus-visible:outline-amber-900 dark:bg-amber-900 dark:text-amber-50 dark:hover:bg-amber-800"
+		>
+			Iniciar sesión
+			<Icon name="arrow-right" size={16} />
+		</a>
+	</div>
+</aside>
+
+<aside
+	aria-label="Comunicaciones destacadas"
+	class="fixed bottom-4 right-4 z-50 max-w-[calc(100vw-2rem)] md:bottom-6 md:right-6"
+>
+	<a
+		href="https://www.sunat.gob.pe/mensajes/mensajes-SUNAT.html"
+		target="_blank"
+		rel="noopener noreferrer"
+		class="group flex flex-col items-end gap-2"
+	>
+		<span
+			class="relative rounded-xl border border-slate-200 bg-white px-3 py-2 text-right text-xs font-semibold text-slate-800 shadow-lg after:absolute after:right-5 after:top-full after:h-0 after:w-0 after:border-4 after:border-transparent after:border-t-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:after:border-t-slate-900"
+		>
+			Comunicaciones destacadas, <span class="text-sunat-magenta dark:text-rose-300">ver más</span>
+		</span>
+		<span
+			class="relative grid h-14 w-14 place-items-center rounded-full bg-sunat-magenta text-white shadow-xl transition-colors animate-hop group-hover:bg-sunat-blue motion-reduce:animate-none"
+		>
+			<Icon name="newspaper" size={26} />
+			<span
+				class="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-amber-400 dark:border-slate-900"
+				aria-hidden="true"></span>
+		</span>
+	</a>
+</aside>
+
+<script is:inline>
+	const menuToggle = document.querySelector('[data-menu-toggle]');
+	const mobileMenu = document.querySelector('#menu-movil');
+
+	const closeMenu = () => {
+		if (!menuToggle || !mobileMenu) return;
+		menuToggle.setAttribute('aria-expanded', 'false');
+		menuToggle.setAttribute('aria-label', 'Abrir menú');
+		mobileMenu.hidden = true;
+	};
+
+	menuToggle?.addEventListener('click', () => {
+		const isOpen = menuToggle.getAttribute('aria-expanded') === 'true';
+		menuToggle.setAttribute('aria-expanded', String(!isOpen));
+		menuToggle.setAttribute('aria-label', isOpen ? 'Abrir menú' : 'Cerrar menú');
+		if (mobileMenu) mobileMenu.hidden = isOpen;
+	});
+
+	mobileMenu?.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeMenu));
+
+	document.addEventListener('keydown', (event) => {
+		if (event.key === 'Escape' && menuToggle?.getAttribute('aria-expanded') === 'true') {
+			closeMenu();
+			menuToggle.focus();
+		}
+	});
+
+	const initNavigation = () => {
+		const navLinks = [...document.querySelectorAll('[data-nav-link]')];
+		const navSections = [...new Set(navLinks.map((link) => link.getAttribute('href')))]
+			.map((href) => ({ href, section: document.querySelector(href) }))
+			.filter((item) => item.section);
+
+		let pendingHref = null;
+		let pendingTimer = null;
+		let scrollTicking = false;
+
+		const setActiveSection = (href) => {
+			navLinks.forEach((link) => {
+				if (link.getAttribute('href') === href) {
+					link.setAttribute('aria-current', 'location');
+				} else {
+					link.removeAttribute('aria-current');
+				}
+			});
+		};
+
+		const updateActiveSection = () => {
+			if (pendingHref) {
+				scrollTicking = false;
+				return;
+			}
+
+			const nav = document.querySelector('nav[aria-label="Menú principal"]');
+			const threshold = (nav?.getBoundingClientRect().height ?? 0) + 24;
+			let current = navSections[0]?.href;
+
+			for (const { href, section } of navSections) {
+				if (section.getBoundingClientRect().top <= threshold) current = href;
+			}
+
+			if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 16) {
+				current = navSections.at(-1)?.href ?? current;
+			}
+
+			if (current) setActiveSection(current);
+			scrollTicking = false;
+		};
+
+		const endPendingScroll = () => {
+			clearTimeout(pendingTimer);
+			pendingTimer = setTimeout(() => {
+				pendingHref = null;
+				updateActiveSection();
+			}, 200);
+		};
+
+		navLinks.forEach((link) => {
+			link.addEventListener('click', () => {
+				pendingHref = link.getAttribute('href');
+				setActiveSection(pendingHref);
+				endPendingScroll();
+			});
+		});
+
+		window.addEventListener(
+			'scroll',
+			() => {
+				if (pendingHref) {
+					endPendingScroll();
+					return;
+				}
+
+				if (scrollTicking) return;
+				scrollTicking = true;
+				requestAnimationFrame(updateActiveSection);
+			},
+			{ passive: true },
+		);
+		window.addEventListener('resize', updateActiveSection);
+		updateActiveSection();
+	};
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', initNavigation, { once: true });
+	} else {
+		initNavigation();
+	}
+</script>

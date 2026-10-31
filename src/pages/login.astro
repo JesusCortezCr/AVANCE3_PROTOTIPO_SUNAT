@@ -1,0 +1,417 @@
+---
+import Icon from '../components/Icon.astro';
+import ThemeToggle from '../components/ThemeToggle.astro';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Iniciar sesión - SUNAT" description="Accede a los servicios personalizados de la SUNAT con tu Clave SOL.">
+	<header class="bg-sunat-red text-white dark:bg-sunat-red-dark">
+		<div class="container-sunat flex h-16 items-center justify-between gap-4">
+			<a href="/" class="flex items-center gap-3" aria-label="gob.pe y SUNAT, ir al inicio">
+				<img src="/img/escudo_blanco.1b27b421.svg" alt="" width="80" height="28" class="h-7 w-auto" />
+				<img src="/img/gobpe_blanco.b8dd3ffa.svg" alt="gob.pe" width="70" height="17" class="hidden h-4 w-auto sm:block" />
+				<span class="hidden h-7 w-px bg-white/40 sm:block"></span>
+				<span class="text-base font-black tracking-tight">SUNAT</span>
+			</a>
+			<div class="flex items-center gap-2">
+				<ThemeToggle />
+				<a href="/" class="inline-flex items-center gap-2 rounded-md text-sm font-semibold hover:underline">
+					<Icon name="arrow-left" size={17} />
+					Volver al inicio
+				</a>
+			</div>
+		</div>
+	</header>
+
+	<main id="contenido" class="bg-slate-50 py-8 dark:bg-slate-950 md:py-12">
+		<div class="container-sunat grid gap-8 lg:grid-cols-[minmax(0,1fr)_460px] lg:items-center">
+			<section class="hidden lg:block" aria-labelledby="titulo-beneficios">
+				<span class="inline-flex items-center gap-2 rounded-full bg-sunat-blue/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-sunat-blue dark:bg-sky-500/15 dark:text-sky-300">
+					<Icon name="shield-check" size={14} />
+					Acceso seguro
+				</span>
+				<h2 id="titulo-beneficios" class="mt-4 max-w-xl text-4xl font-bold leading-tight text-slate-900 dark:text-white">
+					Todo lo que necesitas, en un solo lugar
+				</h2>
+				<p class="mt-4 max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300">
+					Entra con tu RUC o DNI y tu Clave SOL para revisar tus trámites, pagos y documentos
+					de forma segura.
+				</p>
+
+				<ul class="mt-8 grid max-w-xl gap-4">
+					<li class="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+						<span class="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
+							<Icon name="file-text" size={18} />
+						</span>
+						<div>
+							<p class="font-bold text-slate-900 dark:text-slate-100">Declara y paga tus impuestos</p>
+							<p class="text-sm text-slate-600 dark:text-slate-400">Revisa lo que debes y presenta tu declaración.</p>
+						</div>
+					</li>
+					<li class="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+						<span class="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-sky-50 text-sunat-blue dark:bg-sky-950/60 dark:text-sky-300">
+							<Icon name="mail" size={18} />
+						</span>
+						<div>
+							<p class="font-bold text-slate-900 dark:text-slate-100">Tus mensajes de SUNAT</p>
+							<p class="text-sm text-slate-600 dark:text-slate-400">Revisa los avisos y notificaciones que te enviamos.</p>
+						</div>
+					</li>
+					<li class="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+						<span class="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300">
+							<Icon name="credit-card" size={18} />
+						</span>
+						<div>
+							<p class="font-bold text-slate-900 dark:text-slate-100">Boletas y facturas</p>
+							<p class="text-sm text-slate-600 dark:text-slate-400">Emite y guarda tus comprobantes electrónicos.</p>
+						</div>
+					</li>
+				</ul>
+			</section>
+
+			<section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg dark:border-slate-800 dark:bg-slate-900 dark:shadow-slate-950/60 md:p-8" aria-labelledby="titulo-login">
+				<div class="flex items-start gap-3">
+					<span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-sunat-red/10 text-sunat-red dark:bg-rose-500/15 dark:text-rose-300">
+						<Icon name="shield-check" size={22} />
+					</span>
+					<div>
+						<h1 id="titulo-login" class="text-2xl font-bold text-slate-900 dark:text-white">Iniciar sesión</h1>
+						<p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+							Tu RUC o DNI es tu usuario. Tu Clave SOL es tu contraseña.
+						</p>
+					</div>
+				</div>
+
+				<p id="session-note" class="mt-5 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+					<Icon name="info" size={17} class="mt-0.5 shrink-0 text-amber-700 dark:text-amber-300" />
+					<span>
+						Actualmente <strong>no has iniciado sesión</strong>. Al entrar podrás ver tus
+						servicios personales.
+					</span>
+				</p>
+
+				<form id="login-form" class="mt-6 grid gap-4" novalidate>
+					<div>
+						<label for="documento" class="mb-1.5 block text-sm font-bold text-slate-800 dark:text-slate-200">
+							RUC o DNI
+						</label>
+						<input
+							id="documento"
+							name="documento"
+							type="text"
+							inputmode="numeric"
+							autocomplete="username"
+							autocapitalize="off"
+							spellcheck="false"
+							required
+							pattern="[0-9]{8}|[0-9]{11}"
+							title="Ingresa 8 dígitos para DNI u 11 dígitos para RUC"
+							aria-describedby="documento-ayuda documento-estado"
+							aria-errormessage="documento-estado"
+							aria-invalid="false"
+							placeholder="Ej. 74881174 o 20123456789"
+							class="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-slate-900 transition-colors placeholder:text-slate-400 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500"
+						/>
+						<p id="documento-ayuda" class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+							Ingresa 8 dígitos para DNI u 11 dígitos para RUC.
+						</p>
+						<p
+							id="documento-estado"
+							role="status"
+							aria-live="polite"
+							class="mt-1 hidden text-xs font-semibold"
+						>
+						</p>
+					</div>
+
+					<div>
+						<div class="mb-1.5 flex items-center justify-between gap-2">
+							<label for="clave" class="text-sm font-bold text-slate-800 dark:text-slate-200">Clave SOL</label>
+							<a
+								href="https://www.gob.pe/busquedas?institucion%5B%5D=sunat&term=recuperar%20clave%20SOL"
+								target="_blank"
+								rel="noopener noreferrer"
+								class="text-xs font-semibold text-sunat-blue hover:underline dark:text-sky-400 dark:hover:text-sky-300"
+							>
+								¿Olvidaste tu clave?
+							</a>
+						</div>
+						<div class="relative">
+							<input
+								id="clave"
+								name="clave"
+								type="password"
+								autocomplete="current-password"
+								required
+								aria-describedby="clave-ayuda"
+								class="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 pr-20 text-slate-900 placeholder:text-slate-400 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500"
+							/>
+							<button
+								type="button"
+								id="toggle-password"
+								aria-pressed="false"
+								class="absolute inset-y-1 right-1 rounded-md px-3 text-xs font-bold text-sunat-blue transition hover:bg-sky-50 dark:text-sky-400 dark:hover:bg-slate-800"
+							>
+								Mostrar
+							</button>
+						</div>
+						<p id="clave-ayuda" class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+							Es tu contraseña personal para entrar a SUNAT. No la compartas con nadie.
+						</p>
+					</div>
+
+					<label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+						<input type="checkbox" name="recordar" class="h-4 w-4 rounded border-slate-300 text-sunat-blue dark:border-slate-600 dark:bg-slate-800" />
+						Recordarme en este dispositivo
+					</label>
+
+					<button
+						type="submit"
+						class="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-sunat-blue px-5 text-sm font-bold text-white transition hover:bg-sunat-blue-dark dark:bg-sky-700 dark:hover:bg-sky-800"
+					>
+						<Icon name="log-in" size={18} />
+						Ingresar
+					</button>
+
+					<p
+						id="login-feedback"
+						role="status"
+						aria-live="polite"
+						class="hidden rounded-lg border p-3 text-sm"
+					>
+					</p>
+
+					<p class="text-center text-xs text-slate-500 dark:text-slate-400">
+						Datos de prueba: DNI 74881174 o RUC 12345678912 · Clave 12345678
+					</p>
+				</form>
+
+				<div
+					id="login-success"
+					hidden
+					tabindex="-1"
+					role="status"
+					aria-labelledby="login-success-title"
+					class="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900 dark:bg-emerald-950/40"
+				>
+					<div class="flex items-start gap-3">
+						<span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-200">
+							<Icon name="check" size={20} />
+						</span>
+						<div>
+							<h2 id="login-success-title" class="text-lg font-bold text-emerald-950 dark:text-emerald-50">
+								Acceso correcto
+							</h2>
+							<p id="login-success-text" class="mt-1 text-sm text-emerald-900 dark:text-emerald-100"></p>
+							<div class="mt-4 flex flex-wrap gap-2">
+								<a
+									href="/"
+									class="inline-flex h-10 items-center justify-center rounded-lg bg-emerald-700 px-4 text-sm font-bold text-white transition hover:bg-emerald-800 dark:bg-emerald-700 dark:hover:bg-emerald-800"
+								>
+									Ir al inicio
+								</a>
+								<button
+									type="button"
+									id="demo-logout"
+									class="inline-flex h-10 items-center justify-center rounded-lg border border-emerald-300 bg-white px-4 text-sm font-bold text-emerald-900 transition hover:bg-emerald-100 dark:border-emerald-700 dark:bg-slate-900 dark:text-emerald-100 dark:hover:bg-slate-800"
+								>
+									Cerrar sesión
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="mt-6 border-t border-slate-100 pt-5 text-center text-sm dark:border-slate-800">
+					<p class="text-slate-600 dark:text-slate-400">
+						¿Aún no tienes Clave SOL?
+						<a
+							href="https://www.gob.pe/busquedas?institucion%5B%5D=sunat&term=obtener%20clave%20SOL"
+							target="_blank"
+							rel="noopener noreferrer"
+							class="font-semibold text-sunat-blue hover:underline dark:text-sky-400 dark:hover:text-sky-300">Obtén tu clave SOL</a
+						>
+					</p>
+					<a href="/" class="mt-3 inline-flex items-center gap-2 font-semibold text-slate-600 hover:text-sunat-blue hover:underline dark:text-slate-400 dark:hover:text-sky-300">
+						Continuar como invitado
+						<Icon name="arrow-right" size={15} />
+					</a>
+				</div>
+			</section>
+		</div>
+
+		<p class="container-sunat mt-8 text-center text-xs text-slate-500 dark:text-slate-400">
+			Prototipo académico de mejora de interfaz. El inicio de sesión es una simulación.
+		</p>
+	</main>
+
+	<script is:inline>
+		(() => {
+			const form = document.querySelector('#login-form');
+			const documentInput = document.querySelector('#documento');
+			const passwordInput = document.querySelector('#clave');
+			const togglePassword = document.querySelector('#toggle-password');
+			const documentStatus = document.querySelector('#documento-estado');
+			const feedback = document.querySelector('#login-feedback');
+			const successPanel = document.querySelector('#login-success');
+			const successText = document.querySelector('#login-success-text');
+			const logoutButton = document.querySelector('#demo-logout');
+			const sessionNote = document.querySelector('#session-note');
+
+			if (!form || !documentInput || !passwordInput || !documentStatus || !feedback || !successPanel) {
+				return;
+			}
+
+			const DEMO_DOCUMENTS = new Set(['74881174', '12345678912']);
+			const DEMO_PASSWORD = '12345678';
+
+			const setDocumentState = (state, message) => {
+				documentInput.classList.toggle('field-invalid', state === 'error');
+				documentInput.classList.toggle('field-valid', state === 'success');
+				documentInput.setAttribute('aria-invalid', state === 'error' ? 'true' : 'false');
+				documentStatus.textContent = message;
+				documentStatus.dataset.state = state;
+				documentStatus.classList.toggle('hidden', !message);
+			};
+
+			const validateDocument = ({ showEmpty = false } = {}) => {
+				const value = documentInput.value;
+
+				if (!value) {
+					setDocumentState(showEmpty ? 'error' : '', showEmpty ? 'Ingresa tu RUC o DNI.' : '');
+					return false;
+				}
+
+				if (value.length < 8) {
+					const missing = 8 - value.length;
+					const missingLabel = missing === 1 ? 'Falta 1 dígito' : `Faltan ${missing} dígitos`;
+					setDocumentState(
+						'error',
+						`El documento debe tener 8 dígitos (DNI) u 11 (RUC). ${missingLabel}.`,
+					);
+					return false;
+				}
+
+				if (value.length > 11) {
+					setDocumentState('error', 'El documento no puede tener más de 11 dígitos.');
+					return false;
+				}
+
+				if (value.length !== 8 && value.length !== 11) {
+					setDocumentState('error', 'El documento debe tener 8 dígitos (DNI) u 11 dígitos (RUC).');
+					return false;
+				}
+
+				const type = value.length === 8 ? 'DNI' : 'RUC';
+				setDocumentState('success', `${type} válido de ${value.length} dígitos.`);
+				return true;
+			};
+
+			const hideFeedback = () => {
+				feedback.textContent = '';
+				feedback.dataset.state = '';
+				feedback.classList.add('hidden');
+			};
+
+			const showFeedback = (message) => {
+				feedback.textContent = message;
+				feedback.dataset.state = 'error';
+				feedback.classList.remove('hidden');
+			};
+
+			documentInput.addEventListener('beforeinput', (event) => {
+				if (event.inputType === 'insertText' && event.data && /\D/.test(event.data)) {
+					event.preventDefault();
+					setDocumentState(
+						'error',
+						'No se acepta caracteres de texto. Solo puedes ingresar números.',
+					);
+					hideFeedback();
+				}
+			});
+
+			documentInput.addEventListener('input', () => {
+				const rawValue = documentInput.value;
+				const digits = rawValue.replace(/\D/g, '');
+
+				if (rawValue !== digits) {
+					documentInput.value = digits;
+					setDocumentState(
+						'error',
+						'No se acepta caracteres de texto. Solo puedes ingresar números.',
+					);
+					hideFeedback();
+					return;
+				}
+
+				hideFeedback();
+				validateDocument();
+			});
+
+			documentInput.addEventListener('blur', () => {
+				if (documentInput.value) {
+					validateDocument();
+				} else {
+					setDocumentState('', '');
+				}
+			});
+
+			togglePassword?.addEventListener('click', () => {
+				const show = passwordInput.type === 'password';
+				passwordInput.type = show ? 'text' : 'password';
+				togglePassword.textContent = show ? 'Ocultar' : 'Mostrar';
+				togglePassword.setAttribute('aria-pressed', String(show));
+			});
+
+			form.addEventListener('submit', (event) => {
+				event.preventDefault();
+				hideFeedback();
+
+				if (!validateDocument({ showEmpty: true })) {
+					documentInput.focus();
+					return;
+				}
+
+				const documentValue = documentInput.value;
+
+				if (!passwordInput.value) {
+					showFeedback('Ingresa tu Clave SOL para continuar.');
+					passwordInput.focus();
+					return;
+				}
+
+				if (!DEMO_DOCUMENTS.has(documentValue) || passwordInput.value !== DEMO_PASSWORD) {
+					showFeedback(
+						'El RUC/DNI o la Clave SOL no son correctos. Revisa tus datos e inténtalo de nuevo.',
+					);
+					passwordInput.focus();
+					return;
+				}
+
+				const type = documentValue.length === 8 ? 'DNI' : 'RUC';
+				if (successText) {
+					successText.textContent = `Bienvenido. Iniciaste sesión con tu ${type} ${documentValue} en esta simulación.`;
+				}
+				form.classList.add('hidden');
+				sessionNote?.classList.add('hidden');
+				successPanel.hidden = false;
+				successPanel.focus();
+			});
+
+			logoutButton?.addEventListener('click', () => {
+				form.reset();
+				form.classList.remove('hidden');
+				sessionNote?.classList.remove('hidden');
+				successPanel.hidden = true;
+				setDocumentState('', '');
+				hideFeedback();
+				passwordInput.type = 'password';
+				if (togglePassword) {
+					togglePassword.textContent = 'Mostrar';
+					togglePassword.setAttribute('aria-pressed', 'false');
+				}
+				documentInput.focus();
+			});
+		})();
+	</script>
+</Layout>
