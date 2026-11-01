@@ -1,0 +1,103 @@
+---
+import Layout from './Layout.astro';
+import SolHeader from '../components/sol/SolHeader.astro';
+import SolFooter from '../components/sol/SolFooter.astro';
+
+interface Props {
+	title: string;
+	description?: string;
+	current: 'inicio' | 'perfil';
+}
+
+const { title, description, current } = Astro.props;
+---
+
+<Layout title={`${title} - SUNAT Operaciones en Línea`} description={description}>
+	<script is:inline>
+		// Guardia de sesión: sin sesión simulada no se muestra el contenido privado.
+		(() => {
+			const KEY = 'sunat-sesion';
+			let session = null;
+			try {
+				session = JSON.parse(sessionStorage.getItem(KEY) || 'null');
+			} catch {
+				session = null;
+			}
+			if (!session || !session.ruc) {
+				location.replace('/login?motivo=sin-sesion');
+				return;
+			}
+
+			try {
+				const texto = localStorage.getItem('sunat-texto');
+				if (texto) document.documentElement.dataset.texto = texto;
+				const movimiento = localStorage.getItem('sunat-movimiento');
+				if (movimiento) document.documentElement.dataset.movimiento = movimiento;
+			} catch {
+			}
+
+			const logout = (motivo = 'salida') => {
+				try {
+					sessionStorage.removeItem(KEY);
+				} catch {
+				}
+				location.replace(`/login?motivo=${motivo}`);
+			};
+
+			let toastTimer;
+			const toast = (message, tone = 'info') => {
+				const region = document.querySelector('#sol-toast');
+				if (!region) return;
+				region.textContent = message;
+				region.dataset.tone = tone;
+				region.classList.remove('hidden');
+				clearTimeout(toastTimer);
+				toastTimer = setTimeout(() => region.classList.add('hidden'), 4500);
+			};
+
+			const initials = `${session.nombres || ''} ${session.apellidos || ''}`
+				.split(' ')
+				.filter(Boolean)
+				.filter((_, index, parts) => index === 0 || index === parts.length - 2)
+				.map((part) => part[0])
+				.join('')
+				.slice(0, 2);
+
+			const fields = {
+				...session,
+				primerNombre: (session.nombres || '').split(' ')[0] || '',
+				iniciales: initials || 'S',
+				nombreCompleto: `${session.apellidos} ${session.nombres}`.trim(),
+				ingreso: new Date(session.inicio).toLocaleString('es-PE', {
+					dateStyle: 'medium',
+					timeStyle: 'short',
+				}),
+			};
+
+			window.sunatSol = { session, fields, logout, toast };
+
+			document.addEventListener('DOMContentLoaded', () => {
+				document.querySelectorAll('[data-sol-field]').forEach((element) => {
+					const value = fields[element.dataset.solField];
+					if (value) element.textContent = value;
+				});
+			});
+		})();
+	</script>
+
+	<div class="flex min-h-screen flex-col bg-slate-50 dark:bg-slate-950">
+		<SolHeader current={current} />
+		<main id="contenido" tabindex="-1" class="flex-1 focus:outline-none">
+			<slot />
+		</main>
+		<SolFooter />
+	</div>
+
+	<div
+		id="sol-toast"
+		role="status"
+		aria-live="polite"
+		class="sol-toast hidden fixed bottom-4 left-1/2 z-[60] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-xl px-4 py-3 text-sm font-semibold shadow-2xl"
+	>
+	</div>
+</Layout>

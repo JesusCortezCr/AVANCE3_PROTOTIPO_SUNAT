@@ -77,23 +77,46 @@ import Layout from '../layouts/Layout.astro';
 					<div>
 						<h1 id="titulo-login" class="text-2xl font-bold text-slate-900 dark:text-white">Iniciar sesión</h1>
 						<p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-							Tu RUC o DNI es tu usuario. Tu Clave SOL es tu contraseña.
+							Elige si entras con tu RUC o con tu DNI. Tu Clave SOL es tu contraseña.
 						</p>
 					</div>
 				</div>
 
 				<p id="session-note" class="mt-5 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
 					<Icon name="info" size={17} class="mt-0.5 shrink-0 text-amber-700 dark:text-amber-300" />
-					<span>
+					<span id="session-note-text">
 						Actualmente <strong>no has iniciado sesión</strong>. Al entrar podrás ver tus
 						servicios personales.
 					</span>
 				</p>
 
 				<form id="login-form" class="mt-6 grid gap-4" novalidate>
+					<fieldset>
+						<legend class="mb-1.5 text-sm font-bold text-slate-800 dark:text-slate-200">¿Cómo quieres ingresar?</legend>
+						<div class="grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
+							<label class="login-mode">
+								<input type="radio" name="modo" value="ruc" class="sr-only" checked />
+								<span class="flex h-10 items-center justify-center gap-2 rounded-lg text-sm font-bold">
+									<Icon name="building" size={16} />
+									Con RUC
+								</span>
+							</label>
+							<label class="login-mode">
+								<input type="radio" name="modo" value="dni" class="sr-only" />
+								<span class="flex h-10 items-center justify-center gap-2 rounded-lg text-sm font-bold">
+									<Icon name="user" size={16} />
+									Con DNI
+								</span>
+							</label>
+						</div>
+						<p id="modo-ayuda" class="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
+							Para empresas o negocios: RUC, usuario y Clave SOL.
+						</p>
+					</fieldset>
+
 					<div>
-						<label for="documento" class="mb-1.5 block text-sm font-bold text-slate-800 dark:text-slate-200">
-							RUC o DNI
+						<label id="documento-label" for="documento" class="mb-1.5 block text-sm font-bold text-slate-800 dark:text-slate-200">
+							RUC
 						</label>
 						<input
 							id="documento"
@@ -104,19 +127,52 @@ import Layout from '../layouts/Layout.astro';
 							autocapitalize="off"
 							spellcheck="false"
 							required
-							pattern="[0-9]{8}|[0-9]{11}"
-							title="Ingresa 8 dígitos para DNI u 11 dígitos para RUC"
+							pattern="[0-9]{11}"
+							title="Ingresa los 11 dígitos de tu RUC"
 							aria-describedby="documento-ayuda documento-estado"
 							aria-errormessage="documento-estado"
 							aria-invalid="false"
-							placeholder="Ej. 74881174 o 20123456789"
+							placeholder="Ej. 20123456789"
 							class="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-slate-900 transition-colors placeholder:text-slate-400 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500"
 						/>
 						<p id="documento-ayuda" class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-							Ingresa 8 dígitos para DNI u 11 dígitos para RUC.
+							Ingresa los 11 dígitos de tu RUC.
 						</p>
 						<p
 							id="documento-estado"
+							role="status"
+							aria-live="polite"
+							class="mt-1 hidden text-xs font-semibold"
+						>
+						</p>
+					</div>
+
+					<div id="usuario-grupo">
+						<label for="usuario" class="mb-1.5 block text-sm font-bold text-slate-800 dark:text-slate-200">
+							Usuario SOL
+						</label>
+						<input
+							id="usuario"
+							name="usuario"
+							type="text"
+							autocomplete="off"
+							autocapitalize="characters"
+							spellcheck="false"
+							required
+							maxlength="8"
+							pattern="[A-Za-z0-9]{3,8}"
+							title="De 3 a 8 letras o números"
+							aria-describedby="usuario-ayuda usuario-estado"
+							aria-errormessage="usuario-estado"
+							aria-invalid="false"
+							placeholder="Ej. CORTEZ"
+							class="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 uppercase text-slate-900 transition-colors placeholder:normal-case placeholder:text-slate-400 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500"
+						/>
+						<p id="usuario-ayuda" class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+							Es el usuario que creaste junto con tu Clave SOL (de 3 a 8 letras o números).
+						</p>
+						<p
+							id="usuario-estado"
 							role="status"
 							aria-live="polite"
 							class="mt-1 hidden text-xs font-semibold"
@@ -182,7 +238,8 @@ import Layout from '../layouts/Layout.astro';
 					</p>
 
 					<p class="text-center text-xs text-slate-500 dark:text-slate-400">
-						Datos de prueba: DNI 74881174 o RUC 12345678912 · Clave 12345678
+						Datos de prueba: RUC 12345678912 · Usuario CORTEZ · Clave 12345678<br />
+						o DNI 74881174 · Clave 12345678
 					</p>
 				</form>
 
@@ -205,10 +262,11 @@ import Layout from '../layouts/Layout.astro';
 							<p id="login-success-text" class="mt-1 text-sm text-emerald-900 dark:text-emerald-100"></p>
 							<div class="mt-4 flex flex-wrap gap-2">
 								<a
-									href="/"
-									class="inline-flex h-10 items-center justify-center rounded-lg bg-emerald-700 px-4 text-sm font-bold text-white transition hover:bg-emerald-800 dark:bg-emerald-700 dark:hover:bg-emerald-800"
+									href="/sol"
+									class="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-emerald-700 px-4 text-sm font-bold text-white transition hover:bg-emerald-800 dark:bg-emerald-700 dark:hover:bg-emerald-800"
 								>
-									Ir al inicio
+									Ir a mis servicios
+									<Icon name="arrow-right" size={16} />
 								</a>
 								<button
 									type="button"
@@ -249,6 +307,13 @@ import Layout from '../layouts/Layout.astro';
 		(() => {
 			const form = document.querySelector('#login-form');
 			const documentInput = document.querySelector('#documento');
+			const documentLabel = document.querySelector('#documento-label');
+			const documentHelp = document.querySelector('#documento-ayuda');
+			const userGroup = document.querySelector('#usuario-grupo');
+			const userInput = document.querySelector('#usuario');
+			const userStatus = document.querySelector('#usuario-estado');
+			const modeHelp = document.querySelector('#modo-ayuda');
+			const modeInputs = document.querySelectorAll('input[name="modo"]');
 			const passwordInput = document.querySelector('#clave');
 			const togglePassword = document.querySelector('#toggle-password');
 			const documentStatus = document.querySelector('#documento-estado');
@@ -258,52 +323,128 @@ import Layout from '../layouts/Layout.astro';
 			const logoutButton = document.querySelector('#demo-logout');
 			const sessionNote = document.querySelector('#session-note');
 
-			if (!form || !documentInput || !passwordInput || !documentStatus || !feedback || !successPanel) {
+			if (
+				!form ||
+				!documentInput ||
+				!userGroup ||
+				!userInput ||
+				!userStatus ||
+				!passwordInput ||
+				!documentStatus ||
+				!feedback ||
+				!successPanel
+			) {
 				return;
 			}
 
-			const DEMO_DOCUMENTS = new Set(['74881174', '12345678912']);
-			const DEMO_PASSWORD = '12345678';
-
-			const setDocumentState = (state, message) => {
-				documentInput.classList.toggle('field-invalid', state === 'error');
-				documentInput.classList.toggle('field-valid', state === 'success');
-				documentInput.setAttribute('aria-invalid', state === 'error' ? 'true' : 'false');
-				documentStatus.textContent = message;
-				documentStatus.dataset.state = state;
-				documentStatus.classList.toggle('hidden', !message);
+			const SESSION_KEY = 'sunat-sesion';
+			const PERFIL_DEMO = {
+				nombres: 'Jesús Eduardo',
+				apellidos: 'Cortez Ramos',
+				dni: '74881174',
+				estado: 'Activo',
+				condicion: 'Habido',
+				domicilio: 'Av. Ejemplo 123, Lima - Lima - Lima (dato de prueba)',
+				actividad: '72202 - Consultoría en programas de informática (dato de prueba)',
 			};
+			const DEMO_ACCOUNTS = {
+				ruc: {
+					documento: '12345678912',
+					usuario: 'CORTEZ',
+					sesion: { ruc: '12345678912', usuario: 'CORTEZ', tipo: 'Persona natural con negocio', metodo: 'RUC + usuario SOL' },
+				},
+				dni: {
+					documento: '74881174',
+					sesion: { ruc: '10748811741', usuario: '74881174', tipo: 'Persona natural', metodo: 'DNI' },
+				},
+			};
+			const readSession = () => {
+				try {
+					return JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
+				} catch {
+					return null;
+				}
+			};
+			const DEMO_PASSWORD = '12345678';
+			const USER_MIN_LENGTH = 3;
+			const USER_MAX_LENGTH = 8;
+
+			const MODES = {
+				ruc: {
+					label: 'RUC',
+					length: 11,
+					placeholder: 'Ej. 20123456789',
+					help: 'Ingresa los 11 dígitos de tu RUC.',
+					modeHelp: 'Para empresas o negocios: RUC, usuario y Clave SOL.',
+				},
+				dni: {
+					label: 'DNI',
+					length: 8,
+					placeholder: 'Ej. 74881174',
+					help: 'Ingresa los 8 dígitos de tu DNI.',
+					modeHelp: 'Para personas: solo tu DNI y tu Clave SOL.',
+				},
+			};
+
+			let mode = 'ruc';
+
+			const setFieldState = (input, status, state, message) => {
+				input.classList.toggle('field-invalid', state === 'error');
+				input.classList.toggle('field-valid', state === 'success');
+				input.setAttribute('aria-invalid', state === 'error' ? 'true' : 'false');
+				status.textContent = message;
+				status.dataset.state = state;
+				status.classList.toggle('hidden', !message);
+			};
+
+			const setDocumentState = (state, message) =>
+				setFieldState(documentInput, documentStatus, state, message);
+			const setUserState = (state, message) => setFieldState(userInput, userStatus, state, message);
 
 			const validateDocument = ({ showEmpty = false } = {}) => {
 				const value = documentInput.value;
+				const { label, length } = MODES[mode];
 
 				if (!value) {
-					setDocumentState(showEmpty ? 'error' : '', showEmpty ? 'Ingresa tu RUC o DNI.' : '');
+					setDocumentState(showEmpty ? 'error' : '', showEmpty ? `Ingresa tu ${label}.` : '');
 					return false;
 				}
 
-				if (value.length < 8) {
-					const missing = 8 - value.length;
+				if (value.length < length) {
+					const missing = length - value.length;
 					const missingLabel = missing === 1 ? 'Falta 1 dígito' : `Faltan ${missing} dígitos`;
-					setDocumentState(
-						'error',
-						`El documento debe tener 8 dígitos (DNI) u 11 (RUC). ${missingLabel}.`,
-					);
+					setDocumentState('error', `El ${label} debe tener ${length} dígitos. ${missingLabel}.`);
 					return false;
 				}
 
-				if (value.length > 11) {
-					setDocumentState('error', 'El documento no puede tener más de 11 dígitos.');
+				if (value.length > length) {
+					setDocumentState('error', `El ${label} no puede tener más de ${length} dígitos.`);
 					return false;
 				}
 
-				if (value.length !== 8 && value.length !== 11) {
-					setDocumentState('error', 'El documento debe tener 8 dígitos (DNI) u 11 dígitos (RUC).');
+				setDocumentState('success', `${label} válido de ${length} dígitos.`);
+				return true;
+			};
+
+			const validateUser = ({ showEmpty = false } = {}) => {
+				const value = userInput.value;
+
+				if (!value) {
+					setUserState(showEmpty ? 'error' : '', showEmpty ? 'Ingresa tu usuario SOL.' : '');
 					return false;
 				}
 
-				const type = value.length === 8 ? 'DNI' : 'RUC';
-				setDocumentState('success', `${type} válido de ${value.length} dígitos.`);
+				if (value.length < USER_MIN_LENGTH) {
+					setUserState('error', `El usuario debe tener al menos ${USER_MIN_LENGTH} caracteres.`);
+					return false;
+				}
+
+				if (value.length > USER_MAX_LENGTH) {
+					setUserState('error', `El usuario no puede tener más de ${USER_MAX_LENGTH} caracteres.`);
+					return false;
+				}
+
+				setUserState('success', 'Usuario con formato válido.');
 				return true;
 			};
 
@@ -318,6 +459,37 @@ import Layout from '../layouts/Layout.astro';
 				feedback.dataset.state = 'error';
 				feedback.classList.remove('hidden');
 			};
+
+			const applyMode = (nextMode) => {
+				mode = nextMode;
+				const config = MODES[mode];
+				const isRuc = mode === 'ruc';
+
+				if (documentLabel) documentLabel.textContent = config.label;
+				if (documentHelp) documentHelp.textContent = config.help;
+				if (modeHelp) modeHelp.textContent = config.modeHelp;
+				documentInput.placeholder = config.placeholder;
+				documentInput.pattern = `[0-9]{${config.length}}`;
+				documentInput.title = config.help;
+
+				userGroup.hidden = !isRuc;
+				userInput.disabled = !isRuc;
+
+				documentInput.value = '';
+				userInput.value = '';
+				setDocumentState('', '');
+				setUserState('', '');
+				hideFeedback();
+			};
+
+			modeInputs.forEach((input) => {
+				input.addEventListener('change', () => {
+					if (input.checked) {
+						applyMode(input.value);
+						documentInput.focus();
+					}
+				});
+			});
 
 			documentInput.addEventListener('beforeinput', (event) => {
 				if (event.inputType === 'insertText' && event.data && /\D/.test(event.data)) {
@@ -356,6 +528,41 @@ import Layout from '../layouts/Layout.astro';
 				}
 			});
 
+			userInput.addEventListener('beforeinput', (event) => {
+				if (event.inputType === 'insertText' && event.data && /[^A-Za-z0-9]/.test(event.data)) {
+					event.preventDefault();
+					setUserState('error', 'El usuario solo puede tener letras y números, sin espacios ni símbolos.');
+					hideFeedback();
+				}
+			});
+
+			userInput.addEventListener('input', () => {
+				const rawValue = userInput.value;
+				const clean = rawValue.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+
+				if (rawValue.replace(/[^A-Za-z0-9]/g, '') !== rawValue) {
+					userInput.value = clean;
+					setUserState('error', 'El usuario solo puede tener letras y números, sin espacios ni símbolos.');
+					hideFeedback();
+					return;
+				}
+
+				if (rawValue !== clean) {
+					userInput.value = clean;
+				}
+
+				hideFeedback();
+				validateUser();
+			});
+
+			userInput.addEventListener('blur', () => {
+				if (userInput.value) {
+					validateUser();
+				} else {
+					setUserState('', '');
+				}
+			});
+
 			togglePassword?.addEventListener('click', () => {
 				const show = passwordInput.type === 'password';
 				passwordInput.type = show ? 'text' : 'password';
@@ -372,7 +579,13 @@ import Layout from '../layouts/Layout.astro';
 					return;
 				}
 
+				if (mode === 'ruc' && !validateUser({ showEmpty: true })) {
+					userInput.focus();
+					return;
+				}
+
 				const documentValue = documentInput.value;
+				const userValue = userInput.value;
 
 				if (!passwordInput.value) {
 					showFeedback('Ingresa tu Clave SOL para continuar.');
@@ -380,31 +593,50 @@ import Layout from '../layouts/Layout.astro';
 					return;
 				}
 
-				if (!DEMO_DOCUMENTS.has(documentValue) || passwordInput.value !== DEMO_PASSWORD) {
+				const account = DEMO_ACCOUNTS[mode];
+				const validCredentials =
+					documentValue === account.documento &&
+					(mode !== 'ruc' || userValue === account.usuario) &&
+					passwordInput.value === DEMO_PASSWORD;
+
+				if (!validCredentials) {
 					showFeedback(
-						'El RUC/DNI o la Clave SOL no son correctos. Revisa tus datos e inténtalo de nuevo.',
+						mode === 'ruc'
+							? 'El RUC, el usuario o la Clave SOL no son correctos. Revisa tus datos e inténtalo de nuevo.'
+							: 'El DNI o la Clave SOL no son correctos. Revisa tus datos e inténtalo de nuevo.',
 					);
 					passwordInput.focus();
 					return;
 				}
 
-				const type = documentValue.length === 8 ? 'DNI' : 'RUC';
+				try {
+					sessionStorage.setItem(
+						SESSION_KEY,
+						JSON.stringify({ ...PERFIL_DEMO, ...account.sesion, modo: mode, inicio: new Date().toISOString() }),
+					);
+				} catch {
+				}
+
 				if (successText) {
-					successText.textContent = `Bienvenido. Iniciaste sesión con tu ${type} ${documentValue} en esta simulación.`;
+					successText.textContent = `Hola, ${PERFIL_DEMO.nombres}. Te estamos llevando a tus servicios…`;
 				}
 				form.classList.add('hidden');
 				sessionNote?.classList.add('hidden');
 				successPanel.hidden = false;
 				successPanel.focus();
+				setTimeout(() => location.assign('/sol'), 1200);
 			});
 
 			logoutButton?.addEventListener('click', () => {
+				try {
+					sessionStorage.removeItem(SESSION_KEY);
+				} catch {
+				}
 				form.reset();
+				applyMode('ruc');
 				form.classList.remove('hidden');
 				sessionNote?.classList.remove('hidden');
 				successPanel.hidden = true;
-				setDocumentState('', '');
-				hideFeedback();
 				passwordInput.type = 'password';
 				if (togglePassword) {
 					togglePassword.textContent = 'Mostrar';
@@ -412,6 +644,33 @@ import Layout from '../layouts/Layout.astro';
 				}
 				documentInput.focus();
 			});
+
+			const initialMode = document.querySelector('input[name="modo"]:checked');
+			applyMode(initialMode?.value === 'dni' ? 'dni' : 'ruc');
+
+			// Avisos según cómo llegó el usuario al login
+			const MOTIVOS = {
+				salida: { tone: 'ok', text: 'Cerraste sesión correctamente. ¡Hasta pronto!' },
+				inactividad: { tone: 'warn', text: 'Cerramos tu sesión porque no hubo actividad por 15 minutos. Vuelve a ingresar para continuar.' },
+				'sin-sesion': { tone: 'warn', text: 'Para entrar a esa página primero debes iniciar sesión.' },
+			};
+			const motivo = MOTIVOS[new URLSearchParams(location.search).get('motivo')];
+			const noteText = document.querySelector('#session-note-text');
+			if (motivo && sessionNote && noteText) {
+				noteText.textContent = motivo.text;
+				if (motivo.tone === 'ok') {
+					sessionNote.className =
+						'mt-5 flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-950 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-100';
+				}
+			}
+
+			const activeSession = readSession();
+			if (activeSession && successText) {
+				successText.textContent = `Ya tienes una sesión activa como ${activeSession.nombres} (RUC ${activeSession.ruc}).`;
+				form.classList.add('hidden');
+				sessionNote?.classList.add('hidden');
+				successPanel.hidden = false;
+			}
 		})();
 	</script>
 </Layout>

@@ -1,0 +1,517 @@
+---
+import Icon from '../components/Icon.astro';
+import SolLayout from '../layouts/SolLayout.astro';
+import type { IconName } from '../data/icons';
+
+const secciones: { id: string; label: string; icon: IconName }[] = [
+	{ id: 'datos', label: 'Datos del RUC', icon: 'id-card' },
+	{ id: 'domicilio', label: 'Domicilio fiscal', icon: 'map-pin' },
+	{ id: 'contacto', label: 'Datos de contacto', icon: 'phone' },
+	{ id: 'seguridad', label: 'Seguridad y Clave SOL', icon: 'lock' },
+	{ id: 'preferencias', label: 'Accesibilidad y preferencias', icon: 'sliders' },
+];
+
+const reglasClave = [
+	{ id: 'largo', texto: 'Entre 8 y 12 caracteres' },
+	{ id: 'letra', texto: 'Al menos una letra' },
+	{ id: 'numero', texto: 'Al menos un número' },
+	{ id: 'distinta', texto: 'Diferente a tu clave actual' },
+];
+---
+
+<SolLayout title="Mi perfil" description="Revisa y actualiza tus datos como contribuyente." current="perfil">
+	<div class="container-sunat py-6">
+		<nav aria-label="Ruta de navegación" class="text-sm">
+			<ol class="flex flex-wrap items-center gap-1.5 text-slate-500 dark:text-slate-400">
+				<li><a href="/sol" class="link-sunat">Inicio</a></li>
+				<li aria-hidden="true"><Icon name="chevron-right" size={14} /></li>
+				<li aria-current="page" class="font-semibold text-slate-800 dark:text-slate-200">Mi perfil</li>
+			</ol>
+		</nav>
+
+		<!-- Cabecera de perfil -->
+		<section class="mt-4 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900" aria-labelledby="titulo-perfil">
+			<div class="sol-hero h-24 md:h-28"></div>
+			<div class="flex flex-col gap-5 px-5 pb-6 md:flex-row md:items-end md:px-8">
+				<span class="-mt-12 grid h-24 w-24 shrink-0 place-items-center rounded-3xl bg-white text-4xl font-black text-sunat-red shadow-xl ring-4 ring-white dark:bg-sky-400 dark:text-slate-950 dark:ring-slate-900" data-sol-field="iniciales">S</span>
+				<div class="min-w-0 flex-1">
+					<h1 id="titulo-perfil" class="text-2xl font-black tracking-tight text-slate-900 dark:text-white md:text-3xl" data-sol-field="nombreCompleto">Mi perfil</h1>
+					<p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+						RUC <strong class="text-slate-800 dark:text-slate-200" data-sol-field="ruc">—</strong> ·
+						<span data-sol-field="tipo">—</span>
+					</p>
+					<ul class="mt-3 flex flex-wrap gap-2 text-xs font-bold">
+						<li class="sol-badge-ok"><Icon name="shield-check" size={14} />RUC <span data-sol-field="estado">Activo</span></li>
+						<li class="sol-badge-ok"><Icon name="map-pin" size={14} />Domicilio <span data-sol-field="condicion">Habido</span></li>
+					</ul>
+				</div>
+				<div class="w-full md:w-64">
+					<div class="flex items-center justify-between text-sm">
+						<span class="font-semibold text-slate-700 dark:text-slate-300">Perfil completo</span>
+						<strong id="perfil-progreso-texto" class="text-slate-900 dark:text-white">—</strong>
+					</div>
+					<div class="mt-2 h-2.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800" role="progressbar" aria-labelledby="perfil-progreso-texto" aria-valuemin="0" aria-valuemax="100" id="perfil-progreso">
+						<div class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all" id="perfil-progreso-barra" style="width: 0%"></div>
+					</div>
+					<p id="perfil-progreso-ayuda" class="mt-2 text-xs text-slate-500 dark:text-slate-400"></p>
+				</div>
+			</div>
+		</section>
+
+		<div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
+			<nav aria-label="Secciones de mi perfil" class="min-w-0 lg:sticky lg:top-36 lg:self-start">
+				<ul class="flex gap-2 overflow-x-auto pb-2 lg:grid lg:gap-1 lg:overflow-visible lg:pb-0">
+					{
+						secciones.map((s) => (
+							<li class="shrink-0">
+								<a href={`#${s.id}`} data-seccion-link={s.id} class="sol-seccion-link flex h-11 items-center gap-2 rounded-xl px-3 text-sm font-semibold text-slate-600 transition hover:bg-white hover:text-sunat-blue dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-sky-300">
+									<Icon name={s.icon} size={17} />
+									{s.label}
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</nav>
+
+			<div class="grid min-w-0 gap-6">
+				<!-- Datos del RUC -->
+				<section id="datos" class="sol-panel scroll-mt-36" aria-labelledby="titulo-datos" data-seccion>
+					<div class="flex flex-wrap items-start justify-between gap-3">
+						<div>
+							<h2 id="titulo-datos" class="text-lg font-bold text-slate-900 dark:text-white">Datos del RUC</h2>
+							<p class="text-sm text-slate-600 dark:text-slate-400">Así te tiene registrado SUNAT. Solo puedes cambiarlos con el Formulario 3128.</p>
+						</div>
+						<div class="flex flex-wrap gap-2">
+							<button type="button" class="sol-btn-secondary" data-simular="Descargando tu Ficha RUC en PDF… (simulación)">
+								<Icon name="download" size={16} />Ficha RUC
+							</button>
+							<button type="button" class="sol-btn-primary" data-simular="Abriendo «Modificar datos del RUC»… (simulación)">
+								<Icon name="edit" size={16} />Modificar datos
+							</button>
+						</div>
+					</div>
+					<dl class="mt-5 grid gap-x-6 gap-y-4 sm:grid-cols-2">
+						<div class="sol-dato"><dt>Número de RUC</dt><dd data-sol-field="ruc">—</dd></div>
+						<div class="sol-dato"><dt>Tipo de contribuyente</dt><dd data-sol-field="tipo">—</dd></div>
+						<div class="sol-dato"><dt>Apellidos y nombres</dt><dd data-sol-field="nombreCompleto">—</dd></div>
+						<div class="sol-dato"><dt>Documento de identidad</dt><dd>DNI <span data-sol-field="dni">—</span></dd></div>
+						<div class="sol-dato"><dt>Estado del contribuyente</dt><dd><span class="sol-badge-ok"><Icon name="check" size={13} /><span data-sol-field="estado">Activo</span></span></dd></div>
+						<div class="sol-dato"><dt>Sistema de emisión</dt><dd>Electrónico (SEE - SOL)</dd></div>
+						<div class="sol-dato sm:col-span-2"><dt>Actividad económica principal</dt><dd data-sol-field="actividad">—</dd></div>
+					</dl>
+				</section>
+
+				<!-- Domicilio -->
+				<section id="domicilio" class="sol-panel scroll-mt-36" aria-labelledby="titulo-domicilio" data-seccion>
+					<h2 id="titulo-domicilio" class="text-lg font-bold text-slate-900 dark:text-white">Domicilio fiscal</h2>
+					<p class="text-sm text-slate-600 dark:text-slate-400">Es la dirección donde SUNAT puede notificarte en forma física.</p>
+					<div class="mt-4 flex flex-col gap-4 rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/60 sm:flex-row sm:items-center">
+						<span class="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
+							<Icon name="map-pin" size={22} />
+						</span>
+						<div class="flex-1">
+							<p class="font-semibold text-slate-900 dark:text-white" data-sol-field="domicilio">—</p>
+							<p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+								Condición: <strong class="text-emerald-700 dark:text-emerald-300" data-sol-field="condicion">Habido</strong>.
+								SUNAT pudo verificar tu dirección.
+							</p>
+						</div>
+						<button type="button" class="sol-btn-secondary" data-simular="Abriendo el cambio de domicilio fiscal… (simulación)">
+							<Icon name="edit" size={16} />Cambiar domicilio
+						</button>
+					</div>
+				</section>
+
+				<!-- Contacto -->
+				<section id="contacto" class="sol-panel scroll-mt-36" aria-labelledby="titulo-contacto" data-seccion>
+					<h2 id="titulo-contacto" class="text-lg font-bold text-slate-900 dark:text-white">Datos de contacto</h2>
+					<p class="text-sm text-slate-600 dark:text-slate-400">Los usamos para enviarte avisos de vencimientos y de mensajes nuevos en tu buzón.</p>
+					<form id="form-contacto" class="mt-5 grid gap-4 sm:grid-cols-2" novalidate>
+						<div>
+							<label for="correo" class="sol-label">Correo electrónico</label>
+							<input id="correo" name="correo" type="email" autocomplete="email" inputmode="email" placeholder="nombre@correo.com" aria-describedby="correo-estado" class="sol-input" />
+							<p id="correo-estado" class="sol-field-msg" aria-live="polite"></p>
+						</div>
+						<div>
+							<label for="celular" class="sol-label">Celular</label>
+							<div class="flex">
+								<span class="inline-flex items-center rounded-l-lg border border-r-0 border-slate-300 bg-slate-50 px-3 text-sm font-semibold text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">+51</span>
+								<input id="celular" name="celular" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="9" placeholder="987654321" aria-describedby="celular-ayuda celular-estado" class="sol-input rounded-l-none" />
+							</div>
+							<p id="celular-ayuda" class="mt-1 text-xs text-slate-500 dark:text-slate-400">9 dígitos, empieza con 9.</p>
+							<p id="celular-estado" class="sol-field-msg" aria-live="polite"></p>
+						</div>
+						<div class="flex flex-wrap gap-2 sm:col-span-2">
+							<button type="submit" class="sol-btn-primary"><Icon name="check" size={16} />Guardar cambios</button>
+							<button type="reset" class="sol-btn-secondary">Deshacer</button>
+						</div>
+					</form>
+				</section>
+
+				<!-- Seguridad -->
+				<section id="seguridad" class="sol-panel scroll-mt-36" aria-labelledby="titulo-seguridad" data-seccion>
+					<h2 id="titulo-seguridad" class="text-lg font-bold text-slate-900 dark:text-white">Seguridad y Clave SOL</h2>
+					<p class="text-sm text-slate-600 dark:text-slate-400">Protege tu cuenta. Nunca compartas tu Clave SOL.</p>
+
+					<dl class="mt-5 grid gap-4 sm:grid-cols-3">
+						<div class="sol-dato"><dt>Usuario SOL</dt><dd data-sol-field="usuario">—</dd></div>
+						<div class="sol-dato"><dt>Ingreso actual</dt><dd data-sol-field="ingreso">—</dd></div>
+						<div class="sol-dato"><dt>Ingresaste con</dt><dd data-sol-field="metodo">—</dd></div>
+					</dl>
+
+					<form id="form-clave" class="mt-6 grid gap-4 rounded-2xl border border-slate-200 p-4 dark:border-slate-800 md:grid-cols-2 md:p-5" novalidate>
+						<h3 class="font-bold text-slate-900 dark:text-white md:col-span-2">Cambiar Clave SOL</h3>
+						<div class="md:col-span-2 md:max-w-sm">
+							<label for="clave-actual" class="sol-label">Clave actual</label>
+							<input id="clave-actual" type="password" autocomplete="current-password" aria-describedby="clave-actual-estado" class="sol-input" />
+							<p id="clave-actual-estado" class="sol-field-msg" aria-live="polite"></p>
+						</div>
+						<div>
+							<label for="clave-nueva" class="sol-label">Nueva clave</label>
+							<div class="relative">
+								<input id="clave-nueva" type="password" autocomplete="new-password" maxlength="12" aria-describedby="clave-reglas" class="sol-input pr-20" />
+								<button type="button" data-ver-clave="clave-nueva" aria-pressed="false" class="absolute inset-y-1 right-1 rounded-md px-3 text-xs font-bold text-sunat-blue hover:bg-sky-50 dark:text-sky-400 dark:hover:bg-slate-800">Mostrar</button>
+							</div>
+							<div class="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800" aria-hidden="true">
+								<div id="clave-fuerza" class="h-full w-0 rounded-full transition-all"></div>
+							</div>
+						</div>
+						<div>
+							<label for="clave-confirmar" class="sol-label">Repite la nueva clave</label>
+							<input id="clave-confirmar" type="password" autocomplete="new-password" maxlength="12" aria-describedby="clave-confirmar-estado" class="sol-input" />
+							<p id="clave-confirmar-estado" class="sol-field-msg" aria-live="polite"></p>
+						</div>
+						<ul id="clave-reglas" class="grid gap-1.5 text-sm sm:grid-cols-2 md:col-span-2" aria-label="Requisitos de la nueva clave">
+							{
+								reglasClave.map((r) => (
+									<li data-regla={r.id} class="sol-regla flex items-center gap-2 text-slate-500 dark:text-slate-400">
+										<span class="sol-regla-icon grid h-5 w-5 place-items-center rounded-full border border-current"><Icon name="check" size={12} strokeWidth={3} /></span>
+										<span>{r.texto}</span>
+										<span class="sr-only" data-regla-estado>: pendiente</span>
+									</li>
+								))
+							}
+						</ul>
+						<div class="flex flex-wrap gap-2 md:col-span-2">
+							<button type="submit" class="sol-btn-primary"><Icon name="key" size={16} />Actualizar clave</button>
+							<button type="button" data-logout class="sol-btn-secondary"><Icon name="log-out" size={16} />Cerrar sesión</button>
+						</div>
+					</form>
+				</section>
+
+				<!-- Preferencias -->
+				<section id="preferencias" class="sol-panel scroll-mt-36" aria-labelledby="titulo-preferencias" data-seccion>
+					<h2 id="titulo-preferencias" class="text-lg font-bold text-slate-900 dark:text-white">Accesibilidad y preferencias</h2>
+					<p class="text-sm text-slate-600 dark:text-slate-400">Adapta el sistema a tu forma de trabajar. Los cambios se aplican al instante y se guardan en este dispositivo.</p>
+
+					<div class="mt-5 grid gap-6">
+						<fieldset>
+							<legend class="sol-label">Apariencia</legend>
+							<div class="grid gap-2 sm:grid-cols-3">
+								<label class="sol-opcion"><input type="radio" name="tema" value="light" class="sr-only" /><span><Icon name="sun" size={18} />Modo claro</span></label>
+								<label class="sol-opcion"><input type="radio" name="tema" value="dark" class="sr-only" /><span><Icon name="moon" size={18} />Modo oscuro</span></label>
+								<label class="sol-opcion"><input type="radio" name="tema" value="system" class="sr-only" /><span><Icon name="monitor" size={18} />Igual que mi equipo</span></label>
+							</div>
+						</fieldset>
+
+						<fieldset>
+							<legend class="sol-label">Tamaño del texto</legend>
+							<div class="grid gap-2 sm:grid-cols-3">
+								<label class="sol-opcion"><input type="radio" name="texto" value="normal" class="sr-only" /><span><span class="text-sm font-black">Aa</span>Normal</span></label>
+								<label class="sol-opcion"><input type="radio" name="texto" value="grande" class="sr-only" /><span><span class="text-base font-black">Aa</span>Grande</span></label>
+								<label class="sol-opcion"><input type="radio" name="texto" value="extra" class="sr-only" /><span><span class="text-lg font-black">Aa</span>Muy grande</span></label>
+							</div>
+						</fieldset>
+
+						<div class="grid gap-3">
+							<p class="sol-label mb-0">Otras opciones</p>
+							<label class="sol-switch">
+								<span>
+									<span class="block font-semibold text-slate-900 dark:text-white">Reducir animaciones</span>
+									<span class="block text-xs text-slate-500 dark:text-slate-400">Quita movimientos y transiciones de la pantalla.</span>
+								</span>
+								<input type="checkbox" role="switch" data-pref="sunat-movimiento" data-on="reducido" />
+							</label>
+							<label class="sol-switch">
+								<span>
+									<span class="block font-semibold text-slate-900 dark:text-white">Avisos por correo electrónico</span>
+									<span class="block text-xs text-slate-500 dark:text-slate-400">Te escribimos cuando llega un mensaje a tu buzón.</span>
+								</span>
+								<input type="checkbox" role="switch" data-pref="sunat-aviso-correo" data-on="si" />
+							</label>
+							<label class="sol-switch">
+								<span>
+									<span class="block font-semibold text-slate-900 dark:text-white">Recordatorios de vencimiento por SMS</span>
+									<span class="block text-xs text-slate-500 dark:text-slate-400">Un mensaje unos días antes de cada fecha de pago.</span>
+								</span>
+								<input type="checkbox" role="switch" data-pref="sunat-aviso-sms" data-on="si" />
+							</label>
+						</div>
+					</div>
+				</section>
+			</div>
+		</div>
+	</div>
+
+	<script is:inline>
+		(() => {
+			const sol = window.sunatSol;
+			if (!sol) return;
+			const root = document.documentElement;
+			const store = {
+				get: (key) => {
+					try {
+						return localStorage.getItem(key);
+					} catch {
+						return null;
+					}
+				},
+				set: (key, value) => {
+					try {
+						if (value === null) localStorage.removeItem(key);
+						else localStorage.setItem(key, value);
+					} catch {
+					}
+				},
+			};
+
+			document.addEventListener('click', (event) => {
+				const button = event.target instanceof Element ? event.target.closest('[data-simular]') : null;
+				if (button) sol.toast(button.dataset.simular);
+			});
+
+			const setMessage = (input, message, state) => {
+				const status = document.getElementById(`${input.id}-estado`);
+				input.classList.toggle('field-invalid', state === 'error');
+				input.classList.toggle('field-valid', state === 'success');
+				input.setAttribute('aria-invalid', state === 'error' ? 'true' : 'false');
+				if (status) {
+					status.textContent = message;
+					status.dataset.state = state;
+				}
+			};
+
+			// Progreso del perfil
+			const CONTACT_KEY = 'sunat-perfil-contacto';
+			const readContact = () => {
+				try {
+					return JSON.parse(store.get(CONTACT_KEY) || '{}');
+				} catch {
+					return {};
+				}
+			};
+			const updateProgress = () => {
+				const contact = readContact();
+				const pasos = [true, true, Boolean(contact.correo), Boolean(contact.celular)];
+				const value = Math.round((pasos.filter(Boolean).length / pasos.length) * 100);
+				document.querySelector('#perfil-progreso-barra').style.width = `${value}%`;
+				document.querySelector('#perfil-progreso').setAttribute('aria-valuenow', String(value));
+				document.querySelector('#perfil-progreso-texto').textContent = `${value} %`;
+				const faltan = [!contact.correo && 'tu correo', !contact.celular && 'tu celular'].filter(Boolean);
+				const ayuda = document.querySelector('#perfil-progreso-ayuda');
+				ayuda.innerHTML = '';
+				if (faltan.length) {
+					const link = document.createElement('a');
+					link.href = '#contacto';
+					link.className = 'link-sunat';
+					link.textContent = `Agrega ${faltan.join(' y ')}`;
+					ayuda.append(link, ' para recibir avisos.');
+				} else {
+					ayuda.textContent = '¡Tu perfil está completo!';
+				}
+			};
+
+			// Contacto
+			const form = document.querySelector('#form-contacto');
+			const correo = document.querySelector('#correo');
+			const celular = document.querySelector('#celular');
+			const fillContact = () => {
+				const contact = readContact();
+				correo.value = contact.correo || '';
+				celular.value = contact.celular || '';
+				setMessage(correo, '', '');
+				setMessage(celular, '', '');
+			};
+			const validarCorreo = () => {
+				const value = correo.value.trim();
+				if (!value) return setMessage(correo, '', ''), true;
+				const ok = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
+				setMessage(correo, ok ? 'Correo válido.' : 'Revisa el correo. Debe tener la forma nombre@correo.com', ok ? 'success' : 'error');
+				return ok;
+			};
+			const validarCelular = () => {
+				const value = celular.value;
+				if (!value) return setMessage(celular, '', ''), true;
+				if (!/^9/.test(value)) return setMessage(celular, 'El celular debe empezar con 9.', 'error'), false;
+				if (value.length < 9) {
+					const faltan = 9 - value.length;
+					return setMessage(celular, `${faltan === 1 ? 'Falta 1 dígito' : `Faltan ${faltan} dígitos`}.`, 'error'), false;
+				}
+				setMessage(celular, 'Celular válido.', 'success');
+				return true;
+			};
+			celular.addEventListener('input', () => {
+				const digits = celular.value.replace(/\D/g, '');
+				if (digits !== celular.value) {
+					celular.value = digits;
+					setMessage(celular, 'Solo puedes ingresar números.', 'error');
+					return;
+				}
+				validarCelular();
+			});
+			correo.addEventListener('blur', validarCorreo);
+			correo.addEventListener('input', () => correo.classList.contains('field-invalid') && validarCorreo());
+			form.addEventListener('submit', (event) => {
+				event.preventDefault();
+				const okCorreo = validarCorreo();
+				const okCelular = validarCelular();
+				if (!okCorreo) return correo.focus();
+				if (!okCelular) return celular.focus();
+				store.set(CONTACT_KEY, JSON.stringify({ correo: correo.value.trim(), celular: celular.value }));
+				updateProgress();
+				sol.toast('Guardamos tus datos de contacto.', 'success');
+			});
+			form.addEventListener('reset', (event) => {
+				event.preventDefault();
+				fillContact();
+				sol.toast('Restauramos los datos que tenías guardados.');
+			});
+
+			// Cambio de clave
+			const formClave = document.querySelector('#form-clave');
+			const actual = document.querySelector('#clave-actual');
+			const nueva = document.querySelector('#clave-nueva');
+			const confirmar = document.querySelector('#clave-confirmar');
+			const fuerza = document.querySelector('#clave-fuerza');
+			const reglas = () => ({
+				largo: nueva.value.length >= 8 && nueva.value.length <= 12,
+				letra: /[a-zA-Z]/.test(nueva.value),
+				numero: /\d/.test(nueva.value),
+				distinta: nueva.value.length > 0 && nueva.value !== actual.value,
+			});
+			const pintarReglas = () => {
+				const r = reglas();
+				const cumplidas = Object.values(r).filter(Boolean).length;
+				Object.entries(r).forEach(([id, ok]) => {
+					const li = formClave.querySelector(`[data-regla="${id}"]`);
+					li.classList.toggle('is-ok', ok);
+					li.querySelector('[data-regla-estado]').textContent = ok ? ': cumplido' : ': pendiente';
+				});
+				fuerza.style.width = `${(cumplidas / 4) * 100}%`;
+				fuerza.dataset.nivel = cumplidas <= 1 ? 'baja' : cumplidas < 4 ? 'media' : 'alta';
+				return cumplidas === 4;
+			};
+			const validarConfirmacion = () => {
+				if (!confirmar.value) return setMessage(confirmar, '', ''), false;
+				const ok = confirmar.value === nueva.value;
+				setMessage(confirmar, ok ? 'Las claves coinciden.' : 'Las claves no coinciden.', ok ? 'success' : 'error');
+				return ok;
+			};
+			[actual, nueva].forEach((input) => input.addEventListener('input', () => {
+				pintarReglas();
+				if (confirmar.value) validarConfirmacion();
+				if (input === actual) setMessage(actual, '', '');
+			}));
+			confirmar.addEventListener('input', validarConfirmacion);
+			formClave.querySelectorAll('[data-ver-clave]').forEach((button) =>
+				button.addEventListener('click', () => {
+					const input = document.getElementById(button.dataset.verClave);
+					const show = input.type === 'password';
+					input.type = show ? 'text' : 'password';
+					confirmar.type = input.type;
+					button.textContent = show ? 'Ocultar' : 'Mostrar';
+					button.setAttribute('aria-pressed', String(show));
+				}),
+			);
+			formClave.addEventListener('submit', (event) => {
+				event.preventDefault();
+				if (!actual.value) return setMessage(actual, 'Ingresa tu clave actual.', 'error'), actual.focus();
+				if (actual.value !== '12345678') return setMessage(actual, 'La clave actual no es correcta.', 'error'), actual.focus();
+				setMessage(actual, '', '');
+				if (!pintarReglas()) return sol.toast('La nueva clave aún no cumple todos los requisitos.', 'error'), nueva.focus();
+				if (!validarConfirmacion()) {
+					setMessage(confirmar, 'Repite la nueva clave para confirmarla.', 'error');
+					return confirmar.focus();
+				}
+				formClave.reset();
+				pintarReglas();
+				[actual, nueva, confirmar].forEach((input) => setMessage(input, '', ''));
+				sol.toast('Tu Clave SOL se actualizó. (En esta simulación seguirás usando 12345678.)', 'success');
+			});
+
+			// Preferencias: tema
+			const syncThemeLabels = () => {
+				const dark = root.classList.contains('dark');
+				document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+					const label = dark ? 'Activar modo claro' : 'Activar modo oscuro';
+					button.setAttribute('aria-label', label);
+					button.setAttribute('title', label);
+				});
+			};
+			const temaRadios = [...document.querySelectorAll('input[name="tema"]')];
+			const syncTemaRadios = () => {
+				const stored = store.get('sunat-theme');
+				const value = stored || 'system';
+				temaRadios.forEach((r) => (r.checked = r.value === value));
+			};
+			temaRadios.forEach((radio) =>
+				radio.addEventListener('change', () => {
+					const value = radio.value;
+					const dark = value === 'system' ? matchMedia('(prefers-color-scheme: dark)').matches : value === 'dark';
+					store.set('sunat-theme', value === 'system' ? null : value);
+					root.classList.toggle('dark', dark);
+					root.dataset.theme = dark ? 'dark' : 'light';
+					syncThemeLabels();
+				}),
+			);
+			document.addEventListener('click', (event) => {
+				if (event.target instanceof Element && event.target.closest('[data-theme-toggle]')) setTimeout(syncTemaRadios);
+			});
+
+			// Preferencias: tamaño de texto
+			const textoRadios = [...document.querySelectorAll('input[name="texto"]')];
+			const textoActual = store.get('sunat-texto') || 'normal';
+			textoRadios.forEach((radio) => {
+				radio.checked = radio.value === textoActual;
+				radio.addEventListener('change', () => {
+					root.dataset.texto = radio.value;
+					store.set('sunat-texto', radio.value === 'normal' ? null : radio.value);
+					sol.toast(`Tamaño de texto: ${radio.parentElement.textContent.trim().replace(/^Aa/, '')}.`);
+				});
+			});
+
+			// Preferencias: interruptores
+			document.querySelectorAll('[data-pref]').forEach((input) => {
+				input.checked = store.get(input.dataset.pref) === input.dataset.on;
+				input.addEventListener('change', () => {
+					store.set(input.dataset.pref, input.checked ? input.dataset.on : null);
+					if (input.dataset.pref === 'sunat-movimiento') {
+						root.dataset.movimiento = input.checked ? 'reducido' : '';
+					}
+				});
+			});
+
+			// Resaltar la sección visible en el menú lateral
+			const links = [...document.querySelectorAll('[data-seccion-link]')];
+			const observer = new IntersectionObserver(
+				(entries) => {
+					entries.forEach((entry) => {
+						if (!entry.isIntersecting) return;
+						links.forEach((link) => {
+							if (link.dataset.seccionLink === entry.target.id) link.setAttribute('aria-current', 'true');
+							else link.removeAttribute('aria-current');
+						});
+					});
+				},
+				{ rootMargin: '-40% 0px -55% 0px' },
+			);
+			document.querySelectorAll('[data-seccion]').forEach((section) => observer.observe(section));
+
+			fillContact();
+			updateProgress();
+			syncTemaRadios();
+			pintarReglas();
+		})();
+	</script>
+</SolLayout>

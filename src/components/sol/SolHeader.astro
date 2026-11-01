@@ -1,0 +1,341 @@
+---
+import Icon from '../Icon.astro';
+import ThemeToggle from '../ThemeToggle.astro';
+import type { IconName } from '../../data/icons';
+
+interface Props {
+	current: 'inicio' | 'perfil';
+}
+
+const { current } = Astro.props;
+
+const navItems: { id: string; label: string; href: string; icon: IconName; badge?: string }[] = [
+	{ id: 'inicio', label: 'Inicio', href: '/sol', icon: 'home' },
+	{ id: 'buzon', label: 'Buzón electrónico', href: '/sol#buzon', icon: 'inbox', badge: '2' },
+	{ id: 'perfil', label: 'Mi perfil', href: '/perfil', icon: 'user' },
+];
+---
+
+<header class="sticky top-0 z-40 shadow-sm">
+	<div class="bg-sunat-red text-white dark:bg-slate-900 dark:shadow-[inset_0_-1px_0_rgb(51_65_85)]">
+		<div class="container-sunat flex h-16 items-center gap-3">
+			<a href="/sol" class="flex shrink-0 items-center gap-3 rounded-md" aria-label="Menú SOL, ir al inicio de mis servicios">
+				<img src="/img/escudo_blanco.1b27b421.svg" alt="" width="80" height="28" class="h-7 w-auto" />
+				<span class="hidden h-7 w-px bg-white/40 sm:block"></span>
+				<span class="leading-tight">
+					<span class="block text-base font-black tracking-tight">SUNAT</span>
+					<span class="block text-[11px] font-semibold uppercase tracking-wider text-white/80">Operaciones en línea</span>
+				</span>
+			</a>
+
+			<nav aria-label="Navegación de mi cuenta" class="ml-6 hidden items-center gap-1 lg:flex">
+				{
+					navItems.map((item) => (
+						<a
+							href={item.href}
+							aria-current={item.id === current ? 'page' : undefined}
+							class="sol-nav-link relative inline-flex h-10 items-center gap-2 rounded-lg px-3 text-sm font-semibold text-white/90 transition hover:bg-white/10 hover:text-white"
+						>
+							<Icon name={item.icon} size={17} />
+							{item.label}
+							{item.badge && (
+								<span data-buzon-badge class="grid h-5 min-w-5 place-items-center rounded-full bg-amber-300 px-1 text-[11px] font-black text-amber-950">
+									{item.badge}
+								</span>
+							)}
+						</a>
+					))
+				}
+			</nav>
+
+			<div class="ml-auto flex items-center gap-2">
+				<ThemeToggle compact />
+
+				<div class="relative" data-user-menu>
+					<button
+						type="button"
+						id="user-menu-button"
+						aria-haspopup="menu"
+						aria-expanded="false"
+						aria-controls="user-menu"
+						class="flex h-11 items-center gap-2 rounded-full border border-white/30 bg-white/10 py-1 pl-1 pr-2 text-left transition hover:bg-white/20 sm:pr-3"
+					>
+						<span class="grid h-9 w-9 place-items-center rounded-full bg-white text-sm font-black text-sunat-red dark:bg-sky-400 dark:text-slate-950" data-sol-field="iniciales">S</span>
+						<span class="hidden leading-tight md:block">
+							<span class="block text-[11px] font-medium text-white/80">Bienvenido</span>
+							<span class="block max-w-40 truncate text-sm font-bold" data-sol-field="primerNombre">Usuario</span>
+						</span>
+						<Icon name="chevron-down" size={16} class="hidden md:block" />
+						<span class="sr-only">Abrir menú de mi cuenta</span>
+					</button>
+
+					<div
+						id="user-menu"
+						role="menu"
+						aria-labelledby="user-menu-button"
+						hidden
+						class="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-800 shadow-2xl dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+					>
+						<div class="bg-gradient-to-br from-sunat-blue to-sunat-blue-dark p-4 text-white dark:from-sky-900 dark:to-slate-900">
+							<div class="flex items-center gap-3">
+								<span class="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-white text-lg font-black text-sunat-blue ring-4 ring-white/25 dark:bg-sky-400 dark:text-slate-950" data-sol-field="iniciales">S</span>
+								<div class="min-w-0">
+									<p class="truncate font-bold" data-sol-field="nombreCompleto">—</p>
+									<p class="text-xs text-white/80">RUC <span data-sol-field="ruc">—</span></p>
+									<p class="text-xs text-white/80">Usuario SOL: <span data-sol-field="usuario">—</span></p>
+								</div>
+							</div>
+						</div>
+						<ul class="p-2 text-sm">
+							<li>
+								<a role="menuitem" href="/perfil" class="sol-menu-item"><Icon name="user" size={18} />Mi perfil</a>
+							</li>
+							<li>
+								<a role="menuitem" href="/perfil#datos" class="sol-menu-item"><Icon name="id-card" size={18} />Ver mis datos del RUC</a>
+							</li>
+							<li>
+								<a role="menuitem" href="/perfil#seguridad" class="sol-menu-item"><Icon name="lock" size={18} />Cambiar Clave SOL</a>
+							</li>
+							<li>
+								<a role="menuitem" href="/perfil#preferencias" class="sol-menu-item"><Icon name="sliders" size={18} />Accesibilidad y preferencias</a>
+							</li>
+							<li class="my-2 border-t border-slate-100 dark:border-slate-800" role="separator"></li>
+							<li>
+								<button type="button" role="menuitem" data-logout class="sol-menu-item w-full text-red-700 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-950/50">
+									<Icon name="log-out" size={18} />Cerrar sesión
+								</button>
+							</li>
+						</ul>
+					</div>
+				</div>
+
+				<button
+					type="button"
+					id="sol-menu-toggle"
+					aria-expanded="false"
+					aria-controls="sol-menu-movil"
+					class="grid h-10 w-10 place-items-center rounded-lg border border-white/30 transition hover:bg-white/10 lg:hidden"
+				>
+					<span data-icon-open><Icon name="menu" size={20} /></span>
+					<span data-icon-close hidden><Icon name="x" size={20} /></span>
+					<span class="sr-only">Abrir menú de navegación</span>
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<div class="bg-sunat-blue text-white dark:bg-slate-800/95">
+		<div class="container-sunat flex min-h-10 flex-wrap items-center gap-x-4 gap-y-1 py-1.5 text-xs sm:text-sm">
+			<p class="flex items-center gap-1.5">
+				<Icon name="calendar" size={15} class="text-white/80" />
+				<time id="sol-reloj" class="font-semibold">—</time>
+			</p>
+			<p class="flex items-center gap-1.5" title="Tu domicilio fiscal fue verificado por SUNAT">
+				<span class="h-2 w-2 rounded-full bg-emerald-300" aria-hidden="true"></span>
+				Domicilio fiscal: <strong data-sol-field="condicion">Habido</strong>
+			</p>
+			<p class="hidden items-center gap-1.5 md:flex" title="Por tu seguridad, la sesión se cierra si no usas el sistema">
+				<Icon name="clock" size={15} class="text-white/80" />
+				Sesión activa · se cierra por inactividad en <strong id="sol-timer" class="tabular-nums">15:00</strong>
+			</p>
+			<button
+				type="button"
+				data-logout
+				class="ml-auto inline-flex h-8 items-center gap-1.5 rounded-md bg-white/15 px-3 font-bold transition hover:bg-white/25"
+			>
+				<Icon name="log-out" size={15} />
+				Cerrar sesión
+			</button>
+		</div>
+	</div>
+
+	<nav
+		id="sol-menu-movil"
+		aria-label="Navegación de mi cuenta (móvil)"
+		hidden
+		class="border-b border-slate-200 bg-white shadow-lg dark:border-slate-800 dark:bg-slate-900 lg:hidden"
+	>
+		<ul class="container-sunat grid gap-1 py-3">
+			{
+				navItems.map((item) => (
+					<li>
+						<a
+							href={item.href}
+							aria-current={item.id === current ? 'page' : undefined}
+							class="sol-mobile-link flex h-12 items-center gap-3 rounded-lg px-3 font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+						>
+							<Icon name={item.icon} size={19} />
+							{item.label}
+							{item.badge && (
+								<span data-buzon-badge class="ml-auto grid h-6 min-w-6 place-items-center rounded-full bg-amber-300 px-1.5 text-xs font-black text-amber-950">{item.badge}</span>
+							)}
+						</a>
+					</li>
+				))
+			}
+			<li>
+				<a href="/" class="flex h-12 items-center gap-3 rounded-lg px-3 font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
+					<Icon name="globe" size={19} />
+					Portal SUNAT (público)
+				</a>
+			</li>
+		</ul>
+	</nav>
+</header>
+
+<dialog id="dialogo-salir" aria-labelledby="dialogo-salir-titulo" aria-describedby="dialogo-salir-texto" class="sol-dialog">
+	<div class="p-6">
+		<span class="grid h-12 w-12 place-items-center rounded-full bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300">
+			<Icon name="log-out" size={22} />
+		</span>
+		<h2 id="dialogo-salir-titulo" class="mt-4 text-xl font-bold text-slate-900 dark:text-white">¿Cerrar tu sesión?</h2>
+		<p id="dialogo-salir-texto" class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+			Saldrás de Operaciones en línea. Si estabas llenando un formulario, los datos que no guardaste se perderán.
+		</p>
+		<div class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+			<button type="button" data-dialog-cancel class="sol-btn-secondary">Seguir en mi cuenta</button>
+			<button type="button" data-confirm-logout class="sol-btn-danger">
+				<Icon name="log-out" size={17} />
+				Sí, cerrar sesión
+			</button>
+		</div>
+	</div>
+</dialog>
+
+<dialog id="dialogo-inactividad" aria-labelledby="dialogo-inactividad-titulo" class="sol-dialog">
+	<div class="p-6">
+		<span class="grid h-12 w-12 place-items-center rounded-full bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300">
+			<Icon name="clock" size={22} />
+		</span>
+		<h2 id="dialogo-inactividad-titulo" class="mt-4 text-xl font-bold text-slate-900 dark:text-white">¿Sigues ahí?</h2>
+		<p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+			Por tu seguridad, cerraremos tu sesión en
+			<strong id="inactividad-cuenta" class="tabular-nums text-slate-900 dark:text-white">60</strong> segundos
+			porque no detectamos actividad.
+		</p>
+		<div class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+			<button type="button" data-confirm-logout class="sol-btn-secondary">Cerrar sesión ahora</button>
+			<button type="button" data-dialog-cancel class="sol-btn-primary">Seguir conectado</button>
+		</div>
+	</div>
+</dialog>
+
+<script is:inline>
+	(() => {
+		const sol = window.sunatSol;
+		if (!sol) return;
+
+		// Mensajes sin leer del buzón (los marca como leídos la página de inicio)
+		try {
+			const leidos = JSON.parse(localStorage.getItem('sunat-sol-leidos') || '[]');
+			const nuevos = ['msg-1', 'msg-2'].filter((id) => !leidos.includes(id)).length;
+			document.querySelectorAll('[data-buzon-badge]').forEach((el) => {
+				el.textContent = String(nuevos);
+				el.hidden = nuevos === 0;
+			});
+		} catch {
+		}
+
+		// Reloj en tiempo real
+		const clock = document.querySelector('#sol-reloj');
+		const tick = () => {
+			if (!clock) return;
+			const now = new Date();
+			const text = now.toLocaleString('es-PE', {
+				weekday: 'long',
+				day: 'numeric',
+				month: 'long',
+				hour: '2-digit',
+				minute: '2-digit',
+			});
+			clock.textContent = text.charAt(0).toUpperCase() + text.slice(1);
+			clock.dateTime = now.toISOString();
+		};
+		tick();
+		setInterval(tick, 30000);
+
+		// Menú de usuario
+		const menuButton = document.querySelector('#user-menu-button');
+		const menu = document.querySelector('#user-menu');
+		const items = () => [...menu.querySelectorAll('[role="menuitem"]')];
+		const setMenu = (open, focusFirst = false) => {
+			menu.hidden = !open;
+			menuButton.setAttribute('aria-expanded', String(open));
+			if (open && focusFirst) items()[0]?.focus();
+		};
+		menuButton?.addEventListener('click', () => setMenu(menu.hidden, true));
+		menu?.addEventListener('keydown', (event) => {
+			const list = items();
+			const index = list.indexOf(document.activeElement);
+			if (event.key === 'ArrowDown') {
+				event.preventDefault();
+				list[(index + 1) % list.length].focus();
+			} else if (event.key === 'ArrowUp') {
+				event.preventDefault();
+				list[(index - 1 + list.length) % list.length].focus();
+			} else if (event.key === 'Escape') {
+				setMenu(false);
+				menuButton.focus();
+			}
+		});
+		document.addEventListener('click', (event) => {
+			if (!menu.hidden && !event.target.closest('[data-user-menu]')) setMenu(false);
+		});
+
+		// Menú móvil
+		const mobileToggle = document.querySelector('#sol-menu-toggle');
+		const mobileMenu = document.querySelector('#sol-menu-movil');
+		mobileToggle?.addEventListener('click', () => {
+			const open = mobileMenu.hidden;
+			mobileMenu.hidden = !open;
+			mobileToggle.setAttribute('aria-expanded', String(open));
+			mobileToggle.querySelector('[data-icon-open]').hidden = open;
+			mobileToggle.querySelector('[data-icon-close]').hidden = !open;
+		});
+
+		// Cerrar sesión con confirmación (prevención de errores)
+		const logoutDialog = document.querySelector('#dialogo-salir');
+		const idleDialog = document.querySelector('#dialogo-inactividad');
+		document.addEventListener('click', (event) => {
+			const target = event.target instanceof Element ? event.target : null;
+			if (!target) return;
+			if (target.closest('[data-logout]')) {
+				setMenu(false);
+				logoutDialog.showModal();
+			} else if (target.closest('[data-confirm-logout]')) {
+				sol.logout('salida');
+			} else if (target.closest('[data-dialog-cancel]')) {
+				target.closest('dialog')?.close();
+				resetIdle();
+			}
+		});
+
+		// Cierre automático por inactividad
+		const LIMIT = 15 * 60;
+		const WARNING = 60;
+		const timer = document.querySelector('#sol-timer');
+		const idleCount = document.querySelector('#inactividad-cuenta');
+		let remaining = LIMIT;
+		const format = (seconds) =>
+			`${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+		const resetIdle = () => {
+			if (idleDialog.open) return;
+			remaining = LIMIT;
+		};
+		['pointerdown', 'keydown', 'scroll'].forEach((type) =>
+			document.addEventListener(type, resetIdle, { passive: true }),
+		);
+		setInterval(() => {
+			remaining -= 1;
+			if (timer) timer.textContent = format(Math.max(remaining, 0));
+			if (remaining <= WARNING && remaining > 0) {
+				if (!idleDialog.open) idleDialog.showModal();
+				idleCount.textContent = String(remaining);
+			}
+			if (remaining <= 0) sol.logout('inactividad');
+		}, 1000);
+		idleDialog.addEventListener('close', () => {
+			remaining = LIMIT;
+		});
+	})();
+</script>
