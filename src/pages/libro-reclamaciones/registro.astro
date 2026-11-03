@@ -1,0 +1,930 @@
+---
+import Icon from '../../components/Icon.astro';
+import SolLayout from '../../layouts/SolLayout.astro';
+
+const pasos = [
+	{ n: 1, titulo: 'Presentante' },
+	{ n: 2, titulo: 'Titular' },
+	{ n: 3, titulo: 'Detalle' },
+	{ n: 4, titulo: 'Archivos' },
+];
+
+const tiposSolicitud = [
+	{ value: 'Queja', hint: 'Mala atención' },
+	{ value: 'Reclamo', hint: 'Un servicio falló' },
+	{ value: 'Sugerencia', hint: 'Una idea para mejorar' },
+];
+
+// Ubigeo reducido para el prototipo: departamento → provincia → distritos.
+const ubigeo: Record<string, Record<string, string[]>> = {
+	LIMA: {
+		LIMA: ['ATE', 'BREÑA', 'CERCADO DE LIMA', 'COMAS', 'LA VICTORIA', 'LOS OLIVOS', 'MIRAFLORES', 'SAN BORJA', 'SAN ISIDRO', 'SAN JUAN DE LURIGANCHO', 'SAN MARTÍN DE PORRES', 'SANTIAGO DE SURCO'],
+		HUAURA: ['HUACHO', 'HUALMAY', 'SANTA MARÍA'],
+		CAÑETE: ['SAN VICENTE DE CAÑETE', 'ASIA', 'MALA'],
+	},
+	CALLAO: { CALLAO: ['CALLAO', 'BELLAVISTA', 'LA PERLA', 'VENTANILLA'] },
+	AREQUIPA: { AREQUIPA: ['AREQUIPA', 'CAYMA', 'CERRO COLORADO', 'YANAHUARA'] },
+	CUSCO: { CUSCO: ['CUSCO', 'SAN SEBASTIÁN', 'WANCHAQ'] },
+	'LA LIBERTAD': { TRUJILLO: ['TRUJILLO', 'LA ESPERANZA', 'VÍCTOR LARCO HERRERA'] },
+	PIURA: { PIURA: ['PIURA', 'CASTILLA', 'VEINTISÉIS DE OCTUBRE'] },
+};
+
+const solicitudesDemo = [
+	{
+		numero: 'QS-2026-00481',
+		fecha: '29/08/2026 14:23',
+		tipo: 'Sugerencia',
+		titular: '10748811741',
+		estado: 'registrado',
+		sede: 'Mesa de Partes Virtual / Portal Web',
+		motivo: 'Demora en la validación / consulta de comprobantes',
+		descripcion: 'Se sugiere una mejora interactiva en la interfaz de consulta de validez de comprobantes electrónicos para facilitar la ubicación de los datos.',
+	},
+	{
+		numero: 'QS-2026-00219',
+		fecha: '15/07/2026 10:12',
+		tipo: 'Queja',
+		titular: '10748811741',
+		estado: 'tramite',
+		sede: 'Centro de Servicios Lima Centro',
+		motivo: 'Atención del personal',
+		descripcion: 'Esperé más de una hora en el Centro de Servicios y, al llegar a ventanilla, no me orientaron sobre cómo obtener mi Clave SOL.',
+	},
+	{
+		numero: 'QS-2026-00104',
+		fecha: '02/03/2026 16:45',
+		tipo: 'Sugerencia',
+		titular: '10748811741',
+		estado: 'atendido',
+		sede: 'Mesa de Partes Virtual / Portal Web',
+		motivo: 'Disponibilidad del portal de servicios',
+		descripcion: 'El portal no estuvo disponible durante el último día de vencimiento. Sugiero avisar con anticipación los mantenimientos programados.',
+		respuesta: 'Gracias por tu sugerencia. Desde abril de 2026 publicamos los mantenimientos programados con 48 horas de anticipación en el portal y en el buzón electrónico.',
+	},
+];
+
+const req = '<span aria-hidden="true" class="font-bold text-red-600 dark:text-rose-400">*</span>';
+---
+
+<SolLayout title="Libro de Reclamaciones Electrónico" description="Registra una queja, reclamo o sugerencia y sigue su estado." current="reclamos">
+	<div class="container-sunat max-w-5xl py-6">
+		<nav aria-label="Ruta de navegación" class="text-sm">
+			<ol class="flex flex-wrap items-center gap-1.5 text-slate-500 dark:text-slate-400">
+				<li><a href="/sol" class="link-sunat">Inicio</a></li>
+				<li aria-hidden="true"><Icon name="chevron-right" size={14} /></li>
+				<li><a href="/libro-reclamaciones" class="link-sunat">Libro de Reclamaciones</a></li>
+				<li aria-hidden="true"><Icon name="chevron-right" size={14} /></li>
+				<li aria-current="page" class="font-semibold text-slate-800 dark:text-slate-200">Solicitud en línea</li>
+			</ol>
+		</nav>
+
+		<!-- Barra institucional -->
+		<div class="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-900">
+			<div class="flex items-center gap-3">
+				<span class="grid h-10 w-10 place-items-center rounded-xl bg-sunat-red/10 text-sunat-red dark:bg-rose-500/15 dark:text-rose-300">
+					<Icon name="book-open" size={20} />
+				</span>
+				<h1 class="text-lg font-black tracking-tight text-slate-900 dark:text-white sm:text-xl">Libro de Reclamaciones Electrónico</h1>
+			</div>
+			<div class="flex flex-wrap items-center gap-2">
+				<div class="inline-flex rounded-full bg-slate-100 p-1 text-xs font-bold dark:bg-slate-800" role="tablist" aria-label="Vista">
+					<button type="button" role="tab" data-vista="form" class="rounded-full px-3 py-1.5 text-slate-600 transition aria-selected:bg-white aria-selected:text-sunat-blue aria-selected:shadow-sm dark:text-slate-300 dark:aria-selected:bg-slate-950 dark:aria-selected:text-sky-300">Nueva solicitud</button>
+					<button type="button" role="tab" data-vista="lista" class="rounded-full px-3 py-1.5 text-slate-600 transition aria-selected:bg-white aria-selected:text-sunat-blue aria-selected:shadow-sm dark:text-slate-300 dark:aria-selected:bg-slate-950 dark:aria-selected:text-sky-300">Mis solicitudes</button>
+				</div>
+				<time id="lr-reloj" class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+					<Icon name="clock" size={13} /><span>—</span>
+				</time>
+			</div>
+		</div>
+
+		<!-- VISTA 1: FORMULARIO POR PASOS -->
+		<section id="lr-form-view" class="sol-panel mt-5 p-5 sm:p-8" aria-labelledby="lr-titulo-paso">
+			<fieldset class="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+				<legend class="sr-only">Tipo de solicitud</legend>
+				<p class="text-sm text-slate-700 dark:text-slate-300">
+					Bienvenido(a) al Sistema de Quejas, Reclamos y Sugerencias. Selecciona el tipo de solicitud para orientar el formulario:
+				</p>
+				<div class="mt-3 grid gap-2 sm:grid-cols-3">
+					{
+						tiposSolicitud.map((t) => (
+							<label class="sol-opcion">
+								<input type="radio" name="tipoSol" value={t.value} checked={t.value === 'Sugerencia'} class="peer sr-only" form="lr-form" />
+								<span class="peer-checked:border-sunat-blue peer-checked:bg-sky-50 peer-checked:text-sunat-blue peer-focus-visible:ring-2 peer-focus-visible:ring-sky-400 dark:peer-checked:border-sky-400 dark:peer-checked:bg-sky-950/50 dark:peer-checked:text-sky-300">
+									{t.value}
+									<span class="hidden text-xs font-normal text-slate-500 sm:inline dark:text-slate-400">· {t.hint}</span>
+								</span>
+							</label>
+						))
+					}
+				</div>
+			</fieldset>
+
+			<!-- Indicador de fases -->
+			<ol class="relative mt-8 flex justify-between" aria-label="Progreso">
+				<span class="absolute left-[12.5%] right-[12.5%] top-[18px] h-[3px] rounded bg-slate-200 dark:bg-slate-700" aria-hidden="true">
+					<span id="lr-barra" class="block h-full w-0 rounded bg-emerald-500 transition-all duration-300"></span>
+				</span>
+				{
+					pasos.map((p) => (
+						<li class="group relative z-10 flex flex-1 flex-col items-center" data-step-item={p.n} data-state={p.n === 1 ? 'active' : 'pending'}>
+							<button
+								type="button"
+								data-ir-paso={p.n}
+								disabled={p.n !== 1}
+								class="grid h-[38px] w-[38px] place-items-center rounded-full border-[2.5px] border-slate-200 bg-white text-sm font-bold text-slate-500 transition group-data-[state=active]:border-sunat-blue group-data-[state=active]:bg-sunat-blue group-data-[state=active]:text-white group-data-[state=active]:ring-4 group-data-[state=active]:ring-sunat-blue/15 group-data-[state=completed]:cursor-pointer group-data-[state=completed]:border-emerald-600 group-data-[state=completed]:bg-emerald-600 group-data-[state=completed]:text-white disabled:cursor-default dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:group-data-[state=active]:border-sky-500 dark:group-data-[state=active]:bg-sky-600"
+							>
+								<span class="group-data-[state=completed]:hidden">{p.n}</span>
+								<Icon name="check" size={17} strokeWidth={3} class="hidden group-data-[state=completed]:block" />
+								<span class="sr-only" data-step-sr>Paso {p.n}: {p.titulo}</span>
+							</button>
+							<span class="mt-2 hidden text-center text-xs font-semibold text-slate-500 group-data-[state=active]:text-sunat-blue sm:block dark:text-slate-400 dark:group-data-[state=active]:text-sky-300">{p.titulo}</span>
+						</li>
+					))
+				}
+			</ol>
+			<p class="mt-3 text-center text-xs font-semibold text-slate-500 sm:hidden dark:text-slate-400" aria-hidden="true">
+				Paso <span data-paso-actual>1</span> de 4 · <span data-paso-nombre>Presentante</span>
+			</p>
+
+			<form id="lr-form" class="mt-8" novalidate>
+				<!-- FASE 1: Presentante -->
+				<div class="lr-step" data-step="1">
+					<div class="flex flex-wrap items-end justify-between gap-2 border-b border-slate-200 pb-3 dark:border-slate-800">
+						<h2 class="text-lg font-bold text-sunat-blue-dark dark:text-sky-300" tabindex="-1" data-step-title>Fase 1: Identificación de la persona que presenta la solicitud</h2>
+						<button type="button" id="lr-usar-mis-datos" class="link-sunat inline-flex items-center gap-1 text-sm"><Icon name="user" size={15} />Usar mis datos</button>
+					</div>
+					<p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Los campos con <Fragment set:html={req} /> son obligatorios.</p>
+					<div class="mt-4 grid gap-4 sm:grid-cols-2">
+						<div>
+							<label for="p-tipo-doc" class="sol-label">Tipo de documento <Fragment set:html={req} /></label>
+							<select id="p-tipo-doc" name="pTipoDoc" class="sol-input" data-doc-tipo="p-num-doc" required>
+								<option value="DNI">Doc. Nacional de Identidad (DNI)</option>
+								<option value="RUC">Reg. Único de Contribuyentes (RUC)</option>
+								<option value="CE">Carnet de Extranjería</option>
+							</select>
+						</div>
+						<div>
+							<label for="p-num-doc" class="sol-label">Número de documento <Fragment set:html={req} /></label>
+							<input id="p-num-doc" name="pNumDoc" class="sol-input" inputmode="numeric" placeholder="Ej: 74881174" required />
+							<p class="sol-field-msg text-red-700 dark:text-rose-300" data-msg></p>
+						</div>
+						<div class="sm:col-span-2">
+							<label for="p-nombre" class="sol-label">Nombres y apellidos completos <Fragment set:html={req} /></label>
+							<input id="p-nombre" name="pNombre" class="sol-input" autocomplete="name" placeholder="Ingresa tus nombres y apellidos" minlength="5" required />
+							<p class="sol-field-msg text-red-700 dark:text-rose-300" data-msg></p>
+						</div>
+						<div>
+							<label for="p-correo" class="sol-label">Correo electrónico de contacto <Fragment set:html={req} /></label>
+							<input id="p-correo" name="pCorreo" type="email" class="sol-input" autocomplete="email" placeholder="ejemplo@correo.com" required />
+							<p class="sol-field-msg text-red-700 dark:text-rose-300" data-msg></p>
+						</div>
+						<div>
+							<label for="p-telefono" class="sol-label">Teléfono / celular <Fragment set:html={req} /></label>
+							<input id="p-telefono" name="pTelefono" type="tel" class="sol-input" inputmode="numeric" autocomplete="tel" placeholder="Ej: 987654321" pattern="\d{7,9}" required />
+							<p class="sol-field-msg text-red-700 dark:text-rose-300" data-msg></p>
+						</div>
+					</div>
+				</div>
+
+				<!-- FASE 2: Titular -->
+				<div class="lr-step" data-step="2" hidden>
+					<div class="border-b border-slate-200 pb-3 dark:border-slate-800">
+						<h2 class="text-lg font-bold text-sunat-blue-dark dark:text-sky-300" tabindex="-1" data-step-title>Fase 2: Identificación del titular de la solicitud</h2>
+					</div>
+					<p class="mt-2 rounded-xl bg-sky-50 p-3 text-xs text-sky-900 dark:bg-sky-950/40 dark:text-sky-200">
+						<Icon name="info" size={14} class="mr-1 inline" />Completamos estos datos con tu sesión SOL. Puedes cambiarlos si presentas a nombre de otra persona.
+					</p>
+					<div class="mt-4 grid gap-4 sm:grid-cols-2">
+						<div>
+							<label for="t-tipo-doc" class="sol-label">Tipo de documento de identidad <Fragment set:html={req} /></label>
+							<select id="t-tipo-doc" name="tTipoDoc" class="sol-input" data-doc-tipo="t-num-doc" required>
+								<option value="RUC" selected>Reg. Único de Contribuyentes (RUC)</option>
+								<option value="DNI">Doc. Nacional de Identidad (DNI)</option>
+							</select>
+						</div>
+						<div>
+							<label for="t-num-doc" class="sol-label">Número <Fragment set:html={req} /></label>
+							<input id="t-num-doc" name="tNumDoc" class="sol-input" inputmode="numeric" required />
+							<p class="sol-field-msg text-red-700 dark:text-rose-300" data-msg></p>
+						</div>
+						<div class="sm:col-span-2">
+							<label for="t-nombre" class="sol-label">Apellidos y nombres / Razón social <Fragment set:html={req} /></label>
+							<input id="t-nombre" name="tNombre" class="sol-input uppercase" minlength="3" required />
+							<p class="sol-field-msg text-red-700 dark:text-rose-300" data-msg></p>
+						</div>
+						<div class="sm:col-span-2">
+							<label for="t-domicilio" class="sol-label">Domicilio fiscal <Fragment set:html={req} /></label>
+							<input id="t-domicilio" name="tDomicilio" class="sol-input uppercase" minlength="5" required />
+							<p class="sol-field-msg text-red-700 dark:text-rose-300" data-msg></p>
+						</div>
+						<div class="sm:col-span-2">
+							<label for="t-referencia" class="sol-label">Referencia de domicilio <span class="font-normal text-slate-500">(opcional)</span></label>
+							<input id="t-referencia" name="tReferencia" class="sol-input" placeholder="Ej: frente al parque" />
+						</div>
+						<div class="grid gap-4 sm:col-span-2 sm:grid-cols-3">
+							<div>
+								<label for="t-dep" class="sol-label">Departamento <Fragment set:html={req} /></label>
+								<select id="t-dep" name="tDep" class="sol-input" required>
+									{Object.keys(ubigeo).map((d) => <option selected={d === 'LIMA'}>{d}</option>)}
+								</select>
+							</div>
+							<div>
+								<label for="t-prov" class="sol-label">Provincia <Fragment set:html={req} /></label>
+								<select id="t-prov" name="tProv" class="sol-input" required></select>
+							</div>
+							<div>
+								<label for="t-dist" class="sol-label">Distrito <Fragment set:html={req} /></label>
+								<select id="t-dist" name="tDist" class="sol-input" required></select>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- FASE 3: Detalle -->
+				<div class="lr-step" data-step="3" hidden>
+					<div class="border-b border-slate-200 pb-3 dark:border-slate-800">
+						<h2 class="text-lg font-bold text-sunat-blue-dark dark:text-sky-300" tabindex="-1" data-step-title>Fase 3: Detalle de la <span data-tipo-texto>sugerencia</span></h2>
+					</div>
+					<div class="mt-4 grid gap-4">
+						<div>
+							<label for="d-sede" class="sol-label">Sede o canal de atención relacionado <Fragment set:html={req} /></label>
+							<select id="d-sede" name="dSede" class="sol-input" required>
+								<option value="">Selecciona la sede o canal</option>
+								<option value="Mesa de Partes Virtual / Portal Web" selected>Mesa de Partes Virtual / Portal Web</option>
+								<option value="Centro de Servicios Lima Centro">Centro de Servicios Lima Centro</option>
+								<option value="Centro de Servicios Surco">Centro de Servicios Surco</option>
+								<option value="Atención telefónica">Atención telefónica</option>
+								<option value="Chat SUNAT">Chat SUNAT</option>
+							</select>
+							<p class="sol-field-msg text-red-700 dark:text-rose-300" data-msg></p>
+						</div>
+						<div>
+							<label for="d-motivo" class="sol-label">Motivo principal <Fragment set:html={req} /></label>
+							<select id="d-motivo" name="dMotivo" class="sol-input" required>
+								<option value="">Selecciona el motivo</option>
+								<option selected>Demora en la validación / consulta de comprobantes</option>
+								<option>Atención del personal</option>
+								<option>Disponibilidad del portal de servicios</option>
+								<option>Información poco clara</option>
+								<option>Otro</option>
+							</select>
+							<p class="sol-field-msg text-red-700 dark:text-rose-300" data-msg></p>
+						</div>
+						<div>
+							<label for="d-descripcion" class="sol-label">Descripción detallada de los hechos <Fragment set:html={req} /></label>
+							<textarea
+								id="d-descripcion"
+								name="dDescripcion"
+								rows="5"
+								minlength="20"
+								maxlength="1500"
+								required
+								aria-describedby="d-contador"
+								placeholder="Cuéntanos qué pasó, cuándo y dónde, o describe tu sugerencia…"
+								class="sol-input h-auto min-h-32 resize-y py-2.5 leading-relaxed">Se sugiere una mejora interactiva en la interfaz de consulta de validez de comprobantes electrónicos para facilitar la ubicación de los datos.</textarea>
+							<div class="mt-1 flex justify-between gap-2">
+								<p class="sol-field-msg text-red-700 dark:text-rose-300" data-msg></p>
+								<p id="d-contador" class="ml-auto text-xs text-slate-500 dark:text-slate-400"><span data-contador>0</span>/1500</p>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- FASE 4: Archivos -->
+				<div class="lr-step" data-step="4" hidden>
+					<div class="border-b border-slate-200 pb-3 dark:border-slate-800">
+						<h2 class="text-lg font-bold text-sunat-blue-dark dark:text-sky-300" tabindex="-1" data-step-title>Fase 4: Archivos y evidencias a adjuntar</h2>
+					</div>
+					<p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Este paso es opcional. Si no tienes archivos, presiona «Terminar y registrar».</p>
+					<label
+						id="lr-dropzone"
+						for="lr-archivos"
+						class="mt-4 flex cursor-pointer flex-col items-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-8 text-center transition hover:border-sunat-blue hover:bg-sky-50 data-[drag=true]:border-sunat-blue data-[drag=true]:bg-sky-50 dark:border-slate-700 dark:bg-slate-800/40 dark:hover:border-sky-400 dark:hover:bg-sky-950/30 dark:data-[drag=true]:bg-sky-950/30"
+					>
+						<span class="grid h-12 w-12 place-items-center rounded-2xl bg-sunat-blue/10 text-sunat-blue dark:bg-sky-500/15 dark:text-sky-300">
+							<Icon name="download" size={24} class="rotate-180" />
+						</span>
+						<span class="mt-3 font-bold text-slate-900 dark:text-white">Haz clic o arrastra aquí tus documentos de sustento</span>
+						<span class="mt-1 text-xs text-slate-500 dark:text-slate-400">Formatos permitidos: PDF, JPG, PNG (máx. 10 MB por archivo, hasta 5 archivos)</span>
+						<input type="file" id="lr-archivos" class="sr-only" multiple accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" />
+					</label>
+					<p id="lr-archivos-error" class="sol-field-msg text-red-700 dark:text-rose-300" role="alert"></p>
+					<ul id="lr-lista-archivos" class="mt-3 grid gap-2"></ul>
+				</div>
+
+				<!-- Controles de navegación -->
+				<div class="mt-8 flex items-center justify-between gap-3 border-t border-slate-200 pt-5 dark:border-slate-800">
+					<button type="button" id="lr-prev" class="sol-btn-secondary h-11 px-5 invisible">
+						<Icon name="arrow-left" size={16} />Anterior
+					</button>
+					<button type="submit" id="lr-next" class="sol-btn-primary h-11 px-5 data-[final=true]:bg-emerald-600 data-[final=true]:hover:bg-emerald-700">
+						<span data-next-texto>Siguiente</span>
+						<Icon name="arrow-right" size={16} class="data-icon-next" />
+					</button>
+				</div>
+			</form>
+		</section>
+
+		<!-- VISTA 2: LISTADO DE SOLICITUDES Y ESTADOS -->
+		<section id="lr-lista-view" class="sol-panel mt-5 p-5 sm:p-8" aria-labelledby="lr-titulo-lista" hidden>
+			<div id="lr-exito" class="mb-6 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200" role="status" hidden>
+				<span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-emerald-600 text-white"><Icon name="check" size={18} strokeWidth={3} /></span>
+				<div>
+					<p class="font-bold">¡Tu <span data-exito-tipo>solicitud</span> fue registrada!</p>
+					<p class="mt-0.5 text-sm">Número de registro: <strong data-exito-numero class="font-mono">—</strong>. Guárdalo para consultar su estado. Te responderemos al correo <strong data-exito-correo>—</strong>.</p>
+				</div>
+			</div>
+
+			<div class="flex flex-wrap items-end justify-between gap-3">
+				<div>
+					<h2 id="lr-titulo-lista" class="text-xl font-bold text-sunat-blue-dark dark:text-sky-300">Mis solicitudes y reclamos</h2>
+					<p class="text-sm text-slate-500 dark:text-slate-400">Seguimiento de los trámites que presentaste.</p>
+				</div>
+				<div class="flex flex-wrap gap-2">
+					<div class="relative">
+						<label for="lr-buscar" class="sr-only">Buscar por número de registro o tipo</label>
+						<Icon name="search" size={16} class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+						<input id="lr-buscar" type="search" placeholder="Buscar N° o tipo…" class="sol-input h-10 w-48 pl-9 text-sm" />
+					</div>
+					<button type="button" id="lr-nueva" class="sol-btn-primary">+ Nueva solicitud</button>
+				</div>
+			</div>
+
+			<div class="mt-5 overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+				<table class="w-full min-w-[640px] border-collapse text-sm">
+					<thead class="bg-slate-50 text-left text-slate-600 dark:bg-slate-800/60 dark:text-slate-300">
+						<tr>
+							<th scope="col" class="px-4 py-3 font-semibold">N° Registro</th>
+							<th scope="col" class="px-4 py-3 font-semibold">Fecha / Hora</th>
+							<th scope="col" class="px-4 py-3 font-semibold">Tipo</th>
+							<th scope="col" class="px-4 py-3 font-semibold">Titular</th>
+							<th scope="col" class="px-4 py-3 font-semibold">Estado</th>
+							<th scope="col" class="px-4 py-3 font-semibold"><span class="sr-only">Acción</span></th>
+						</tr>
+					</thead>
+					<tbody id="lr-tabla" class="divide-y divide-slate-200 text-slate-700 dark:divide-slate-800 dark:text-slate-200"></tbody>
+				</table>
+			</div>
+			<p id="lr-tabla-vacia" class="mt-4 text-center text-sm text-slate-500 dark:text-slate-400" hidden>No encontramos solicitudes con ese criterio.</p>
+		</section>
+	</div>
+
+	<!-- Cargo de la solicitud -->
+	<dialog id="lr-cargo" class="sol-dialog max-w-2xl overflow-hidden" aria-labelledby="lr-cargo-titulo">
+		<div class="flex max-h-[90vh] flex-col">
+			<!-- Encabezado -->
+			<header class="relative bg-gradient-to-br from-sunat-blue to-sunat-blue-dark px-5 pb-5 pt-4 text-white dark:from-sky-900 dark:to-slate-900 sm:px-6">
+				<div class="flex items-start justify-between gap-3">
+					<div class="flex items-center gap-3">
+						<span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/15"><Icon name="file-text" size={20} /></span>
+						<div>
+							<h2 id="lr-cargo-titulo" class="text-base font-bold leading-tight">Cargo de presentación</h2>
+							<p class="text-xs text-white/75">Libro de Reclamaciones Electrónico · SUNAT</p>
+						</div>
+					</div>
+					<form method="dialog" data-no-print>
+						<button class="grid h-9 w-9 place-items-center rounded-full text-2xl leading-none text-white/80 transition hover:bg-white/15 hover:text-white" aria-label="Cerrar cargo">×</button>
+					</form>
+				</div>
+				<div class="mt-5 flex flex-wrap items-end justify-between gap-3">
+					<div>
+						<p class="text-[11px] font-semibold uppercase tracking-wider text-white/70">N° de registro</p>
+						<p class="font-mono text-2xl font-black tracking-tight sm:text-3xl" data-cargo-numero>—</p>
+					</div>
+					<span class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-bold uppercase" data-cargo-estado>—</span>
+				</div>
+			</header>
+
+			<div class="overflow-y-auto">
+				<!-- Seguimiento -->
+				<ol class="grid grid-cols-3 gap-2 border-b border-slate-100 px-5 py-4 dark:border-slate-800 sm:px-6" aria-label="Seguimiento" data-cargo-timeline></ol>
+
+				<!-- Datos -->
+				<dl class="sol-dato grid grid-cols-2 gap-x-4 gap-y-4 px-5 py-5 sm:grid-cols-3 sm:px-6" data-cargo-datos></dl>
+
+				<!-- Observación -->
+				<section class="px-5 pb-5 sm:px-6" aria-labelledby="lr-cargo-obs-titulo">
+					<h3 id="lr-cargo-obs-titulo" class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+						<Icon name="message" size={14} />Observación registrada
+					</h3>
+					<blockquote class="mt-2 whitespace-pre-line break-words rounded-xl border-l-4 border-sunat-blue bg-slate-50 p-4 text-sm leading-relaxed text-slate-800 dark:border-sky-400 dark:bg-slate-800/60 dark:text-slate-100" data-cargo-descripcion></blockquote>
+				</section>
+
+				<!-- Respuesta de SUNAT -->
+				<section class="px-5 pb-5 sm:px-6" aria-labelledby="lr-cargo-resp-titulo" data-cargo-respuesta-wrap hidden>
+					<h3 id="lr-cargo-resp-titulo" class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
+						<Icon name="check" size={14} strokeWidth={3} />Respuesta de SUNAT
+					</h3>
+					<p class="mt-2 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-relaxed text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-100" data-cargo-respuesta></p>
+				</section>
+
+				<!-- Archivos -->
+				<section class="px-5 pb-5 sm:px-6" aria-labelledby="lr-cargo-arch-titulo">
+					<h3 id="lr-cargo-arch-titulo" class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+						<Icon name="file-text" size={14} />Archivos adjuntos
+					</h3>
+					<ul class="mt-2 flex flex-wrap gap-2" data-cargo-archivos></ul>
+				</section>
+
+				<p class="mx-5 mb-5 flex items-start gap-2 rounded-xl bg-amber-50 p-3 text-xs text-amber-900 dark:bg-amber-500/10 dark:text-amber-200 sm:mx-6">
+					<Icon name="info" size={14} class="mt-0.5 shrink-0" />
+					SUNAT responde por escrito en un plazo máximo de 30 días hábiles desde la fecha de registro.
+				</p>
+			</div>
+
+			<footer class="flex flex-wrap justify-end gap-2 border-t border-slate-100 bg-slate-50 px-5 py-3 dark:border-slate-800 dark:bg-slate-900 sm:px-6" data-no-print>
+				<button type="button" class="sol-btn-secondary" data-cargo-imprimir><Icon name="printer" size={16} />Imprimir</button>
+				<form method="dialog"><button class="sol-btn-primary">Cerrar</button></form>
+			</footer>
+		</div>
+	</dialog>
+
+	<style is:global>
+		@media print {
+			body.lr-imprimiendo * {
+				visibility: hidden;
+			}
+			body.lr-imprimiendo #lr-cargo,
+			body.lr-imprimiendo #lr-cargo * {
+				visibility: visible;
+			}
+			body.lr-imprimiendo #lr-cargo {
+				position: absolute;
+				inset: 0;
+				max-width: none;
+				width: 100%;
+				margin: 0;
+				border: 0;
+				box-shadow: none;
+			}
+			body.lr-imprimiendo #lr-cargo > div,
+			body.lr-imprimiendo #lr-cargo .overflow-y-auto {
+				max-height: none;
+				overflow: visible;
+			}
+			body.lr-imprimiendo [data-no-print] {
+				display: none !important;
+			}
+		}
+	</style>
+
+	<script is:inline define:vars={{ ubigeo, solicitudesDemo }}>
+		(() => {
+			const sol = window.sunatSol;
+			if (!sol) return;
+			const session = sol.session || {};
+
+			const $ = (sel, root = document) => root.querySelector(sel);
+			const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+			const pad = (n) => String(n).padStart(2, '0');
+			const fechaHora = (d = new Date()) =>
+				`${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+			const escapeHtml = (s) =>
+				String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+
+			// Reloj
+			const reloj = $('#lr-reloj span');
+			const tick = () => (reloj.textContent = fechaHora());
+			tick();
+			setInterval(tick, 30000);
+
+			// ----- Estado del asistente -----
+			let currentStep = 1;
+			const totalSteps = 4;
+			const nombresPaso = ['Presentante', 'Titular', 'Detalle', 'Archivos'];
+
+			const form = $('#lr-form');
+			const btnPrev = $('#lr-prev');
+			const btnNext = $('#lr-next');
+			const formView = $('#lr-form-view');
+			const listaView = $('#lr-lista-view');
+			const tipoSeleccionado = () => $('input[name="tipoSol"]:checked').value;
+
+			// ----- Documentos: longitud según tipo -----
+			const DOCS = { DNI: { len: [8, 8], ej: '74881174' }, RUC: { len: [11, 11], ej: '10748811741' }, CE: { len: [9, 12], ej: '001234567' } };
+			const syncDoc = (select) => {
+				const input = document.getElementById(select.dataset.docTipo);
+				const { len, ej } = DOCS[select.value];
+				input.maxLength = len[1];
+				input.placeholder = `Ej: ${ej}`;
+				input.dataset.min = String(len[0]);
+			};
+			$$('[data-doc-tipo]').forEach((s) => {
+				syncDoc(s);
+				s.addEventListener('change', () => syncDoc(s));
+			});
+			$$('[data-doc-tipo]').forEach((s) => {
+				const input = document.getElementById(s.dataset.docTipo);
+				input.addEventListener('input', () => (input.value = input.value.replace(/\D/g, '')));
+			});
+			$('#p-telefono').addEventListener('input', (e) => (e.target.value = e.target.value.replace(/\D/g, '').slice(0, 9)));
+
+			// ----- Ubigeo en cascada -----
+			const dep = $('#t-dep');
+			const prov = $('#t-prov');
+			const dist = $('#t-dist');
+			const fill = (select, values, selected) => {
+				select.innerHTML = values.map((v) => `<option${v === selected ? ' selected' : ''}>${escapeHtml(v)}</option>`).join('');
+			};
+			const syncProv = (selected) => {
+				fill(prov, Object.keys(ubigeo[dep.value]), selected);
+				syncDist();
+			};
+			const syncDist = (selected) => fill(dist, ubigeo[dep.value][prov.value], selected);
+			dep.addEventListener('change', () => syncProv());
+			prov.addEventListener('change', () => syncDist());
+
+			// ----- Datos de la sesión -----
+			const nombreSesion = `${session.nombres || ''} ${session.apellidos || ''}`.trim();
+			const prefillTitular = () => {
+				$('#t-tipo-doc').value = 'RUC';
+				syncDoc($('#t-tipo-doc'));
+				$('#t-num-doc').value = session.ruc || '';
+				$('#t-nombre').value = `${session.apellidos || ''} ${session.nombres || ''}`.trim().toUpperCase();
+				$('#t-domicilio').value = (session.domicilio || '').replace(/\s*\(dato de prueba\)/i, '').toUpperCase();
+				dep.value = 'LIMA';
+				syncProv('LIMA');
+				syncDist('SAN JUAN DE LURIGANCHO');
+			};
+			$('#lr-usar-mis-datos').addEventListener('click', () => {
+				$('#p-tipo-doc').value = session.dni ? 'DNI' : 'RUC';
+				syncDoc($('#p-tipo-doc'));
+				$('#p-num-doc').value = session.dni || session.ruc || '';
+				$('#p-nombre').value = nombreSesion;
+				if (session.correo) $('#p-correo').value = session.correo;
+				if (session.celular) $('#p-telefono').value = session.celular;
+				$$('#p-num-doc, #p-nombre').forEach((el) => setError(el, ''));
+				sol.toast('Completamos tus datos de la sesión. Revisa el correo y el teléfono.', 'success');
+			});
+
+			// ----- Tipo de solicitud -----
+			const syncTipo = () => {
+				const tipo = tipoSeleccionado().toLowerCase();
+				$$('[data-tipo-texto]').forEach((el) => (el.textContent = tipo));
+			};
+			$$('input[name="tipoSol"]').forEach((r) => r.addEventListener('change', syncTipo));
+
+			// ----- Contador de caracteres -----
+			const descripcion = $('#d-descripcion');
+			const syncContador = () => ($('[data-contador]').textContent = String(descripcion.value.length));
+			descripcion.addEventListener('input', syncContador);
+
+			// ----- Validación por paso -----
+			const msgFor = (el) => el.closest('div')?.querySelector(':scope > [data-msg], :scope > div > [data-msg]');
+			function setError(el, message) {
+				el.classList.toggle('field-invalid', Boolean(message));
+				el.setAttribute('aria-invalid', message ? 'true' : 'false');
+				const msg = msgFor(el);
+				if (msg) {
+					if (!msg.id) msg.id = `${el.id}-msg`;
+					msg.textContent = message;
+					el.setAttribute('aria-describedby', [msg.id, el.id === 'd-descripcion' ? 'd-contador' : ''].filter(Boolean).join(' '));
+				}
+			}
+			const errorDe = (el) => {
+				const value = el.value.trim();
+				if (el.required && !value) return 'Este campo es obligatorio.';
+				if (el.dataset.min && value.length < Number(el.dataset.min))
+					return el.dataset.min === String(el.maxLength)
+						? `Debe tener ${el.maxLength} dígitos.`
+						: `Debe tener entre ${el.dataset.min} y ${el.maxLength} dígitos.`;
+				if (el.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)) return 'Escribe un correo válido, por ejemplo nombre@correo.com.';
+				if (el.id === 'p-telefono' && !/^\d{7,9}$/.test(value)) return 'Escribe un número de 7 a 9 dígitos.';
+				if (el.minLength > 0 && value.length < el.minLength) return `Escribe al menos ${el.minLength} caracteres.`;
+				return '';
+			};
+			const validarPaso = (n) => {
+				const campos = $$(`.lr-step[data-step="${n}"] :is(input, select, textarea)`).filter((el) => el.type !== 'file');
+				let primero = null;
+				campos.forEach((el) => {
+					const err = errorDe(el);
+					setError(el, err);
+					if (err && !primero) primero = el;
+				});
+				if (primero) {
+					primero.focus();
+					sol.toast('Revisa los campos marcados en rojo.', 'error');
+				}
+				return !primero;
+			};
+			form.addEventListener('input', (e) => {
+				if (e.target.classList.contains('field-invalid')) setError(e.target, errorDe(e.target));
+			});
+			form.addEventListener('change', (e) => {
+				if (e.target.classList.contains('field-invalid')) setError(e.target, errorDe(e.target));
+			});
+
+			// ----- Archivos -----
+			const MAX_FILES = 5;
+			const MAX_SIZE = 10 * 1024 * 1024;
+			const TIPOS_OK = ['application/pdf', 'image/jpeg', 'image/png'];
+			let archivos = [];
+			const fileInput = $('#lr-archivos');
+			const dropzone = $('#lr-dropzone');
+			const errorArchivos = $('#lr-archivos-error');
+			const tamano = (b) => (b < 1024 * 1024 ? `${Math.max(1, Math.round(b / 1024))} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`);
+			const renderArchivos = () => {
+				$('#lr-lista-archivos').innerHTML = archivos
+					.map(
+						(f, i) => `<li class="flex items-center gap-3 rounded-xl border border-slate-200 p-3 text-sm dark:border-slate-800">
+							<span class="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-slate-100 text-xs font-black uppercase text-slate-600 dark:bg-slate-800 dark:text-slate-300">${escapeHtml(f.name.split('.').pop())}</span>
+							<span class="min-w-0 flex-1"><span class="block truncate font-semibold text-slate-800 dark:text-slate-100">${escapeHtml(f.name)}</span><span class="text-xs text-slate-500 dark:text-slate-400">${tamano(f.size)}</span></span>
+							<button type="button" data-quitar-archivo="${i}" class="grid h-8 w-8 place-items-center rounded-full text-lg text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/50" aria-label="Quitar ${escapeHtml(f.name)}">×</button>
+						</li>`,
+					)
+					.join('');
+			};
+			const agregarArchivos = (lista) => {
+				const errores = [];
+				[...lista].forEach((f) => {
+					if (!TIPOS_OK.includes(f.type)) errores.push(`«${f.name}» no es PDF, JPG ni PNG.`);
+					else if (f.size > MAX_SIZE) errores.push(`«${f.name}» pesa más de 10 MB.`);
+					else if (archivos.length >= MAX_FILES) errores.push(`Solo puedes adjuntar hasta ${MAX_FILES} archivos.`);
+					else if (!archivos.some((a) => a.name === f.name && a.size === f.size)) archivos.push(f);
+				});
+				errorArchivos.textContent = [...new Set(errores)].join(' ');
+				renderArchivos();
+			};
+			fileInput.addEventListener('change', () => {
+				agregarArchivos(fileInput.files);
+				fileInput.value = '';
+			});
+			['dragenter', 'dragover'].forEach((ev) =>
+				dropzone.addEventListener(ev, (e) => {
+					e.preventDefault();
+					dropzone.dataset.drag = 'true';
+				}),
+			);
+			['dragleave', 'drop'].forEach((ev) =>
+				dropzone.addEventListener(ev, (e) => {
+					e.preventDefault();
+					dropzone.dataset.drag = 'false';
+				}),
+			);
+			dropzone.addEventListener('drop', (e) => agregarArchivos(e.dataTransfer.files));
+			$('#lr-lista-archivos').addEventListener('click', (e) => {
+				const btn = e.target.closest('[data-quitar-archivo]');
+				if (!btn) return;
+				archivos.splice(Number(btn.dataset.quitarArchivo), 1);
+				renderArchivos();
+			});
+
+			// ----- Vista de pasos (misma lógica que el original) -----
+			function updateStepView({ focus = true } = {}) {
+				$$('.lr-step').forEach((step) => (step.hidden = Number(step.dataset.step) !== currentStep));
+
+				$$('[data-step-item]').forEach((item) => {
+					const n = Number(item.dataset.stepItem);
+					const state = n === currentStep ? 'active' : n < currentStep ? 'completed' : 'pending';
+					item.dataset.state = state;
+					const btn = item.querySelector('[data-ir-paso]');
+					btn.disabled = state !== 'completed';
+					if (state === 'active') btn.setAttribute('aria-current', 'step');
+					else btn.removeAttribute('aria-current');
+					item.querySelector('[data-step-sr]').textContent =
+						`Paso ${n}: ${nombresPaso[n - 1]}${state === 'completed' ? ' (completado, volver)' : state === 'active' ? ' (actual)' : ''}`;
+				});
+				$('#lr-barra').style.width = `${((currentStep - 1) / (totalSteps - 1)) * 100}%`;
+				$('[data-paso-actual]').textContent = String(currentStep);
+				$('[data-paso-nombre]').textContent = nombresPaso[currentStep - 1];
+
+				btnPrev.classList.toggle('invisible', currentStep === 1);
+
+				const final = currentStep === totalSteps;
+				btnNext.dataset.final = String(final);
+				$('[data-next-texto]', btnNext).textContent = final ? 'Terminar y registrar ✔' : 'Siguiente';
+				$('.data-icon-next', btnNext)?.classList.toggle('hidden', final);
+
+				if (focus) $(`.lr-step[data-step="${currentStep}"] [data-step-title]`).focus();
+			}
+
+			form.addEventListener('submit', (e) => {
+				e.preventDefault();
+				if (!validarPaso(currentStep)) return;
+				if (currentStep < totalSteps) {
+					currentStep++;
+					updateStepView();
+				} else {
+					registrarSolicitud();
+				}
+			});
+
+			btnPrev.addEventListener('click', () => {
+				if (currentStep > 1) {
+					currentStep--;
+					updateStepView();
+				}
+			});
+
+			$$('[data-ir-paso]').forEach((btn) =>
+				btn.addEventListener('click', () => {
+					const n = Number(btn.dataset.irPaso);
+					if (n < currentStep) {
+						currentStep = n;
+						updateStepView();
+					}
+				}),
+			);
+
+			// ----- Listado de solicitudes -----
+			const KEY = 'sunat-libro-reclamaciones';
+			const leer = () => {
+				try {
+					return JSON.parse(localStorage.getItem(KEY) || 'null');
+				} catch {
+					return null;
+				}
+			};
+			const guardar = () => {
+				try {
+					localStorage.setItem(KEY, JSON.stringify(solicitudes));
+				} catch {}
+			};
+			let solicitudes = leer() || solicitudesDemo.map((s) => ({ ...s, titular: session.ruc || s.titular }));
+			// Completa datos de ejemplo que no existían en versiones anteriores guardadas.
+			solicitudes = solicitudes.map((s) => {
+				const demo = solicitudesDemo.find((d) => d.numero === s.numero);
+				return demo ? { ...demo, ...s, titular: s.titular } : s;
+			});
+
+			const ESTADOS = {
+				registrado: { label: 'Registrado', cls: 'bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-300' },
+				tramite: { label: 'En trámite', cls: 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300' },
+				atendido: { label: 'Atendido', cls: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300' },
+			};
+
+			const buscar = $('#lr-buscar');
+			const renderTabla = () => {
+				const q = buscar.value.trim().toLowerCase();
+				const filas = solicitudes.filter((s) => !q || `${s.numero} ${s.tipo} ${s.motivo}`.toLowerCase().includes(q));
+				$('#lr-tabla-vacia').hidden = filas.length > 0;
+				$('#lr-tabla').innerHTML = filas
+					.map((s) => {
+						const est = ESTADOS[s.estado];
+						return `<tr class="transition hover:bg-slate-50 dark:hover:bg-slate-800/40${s.nuevo ? ' bg-emerald-50/60 dark:bg-emerald-950/20' : ''}">
+							<td class="px-4 py-3.5 font-mono font-bold text-slate-900 dark:text-white">${escapeHtml(s.numero)}</td>
+							<td class="px-4 py-3.5">${escapeHtml(s.fecha)}</td>
+							<td class="px-4 py-3.5">${escapeHtml(s.tipo)}</td>
+							<td class="px-4 py-3.5">${escapeHtml(s.titular)}</td>
+							<td class="px-4 py-3.5"><span class="inline-flex rounded-full px-2.5 py-1 text-xs font-bold uppercase ${est.cls}">${est.label}</span></td>
+							<td class="px-4 py-3.5 text-right"><button type="button" data-cargo="${escapeHtml(s.numero)}" class="rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-bold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">Ver cargo</button></td>
+						</tr>`;
+					})
+					.join('');
+			};
+			buscar.addEventListener('input', renderTabla);
+
+			const cargo = $('#lr-cargo');
+			const ORDEN_ESTADOS = ['registrado', 'tramite', 'atendido'];
+			const DOT = {
+				registrado: 'bg-sky-500',
+				tramite: 'bg-amber-500',
+				atendido: 'bg-emerald-500',
+			};
+			const abrirCargo = (s) => {
+				const est = ESTADOS[s.estado];
+				$('[data-cargo-numero]', cargo).textContent = s.numero;
+				const pill = $('[data-cargo-estado]', cargo);
+				pill.className = `inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase ring-2 ring-white/40 ${est.cls}`;
+				pill.innerHTML = `<span class="h-2 w-2 rounded-full ${DOT[s.estado]}"></span>${est.label}`;
+
+				const actual = ORDEN_ESTADOS.indexOf(s.estado);
+				$('[data-cargo-timeline]', cargo).innerHTML = ORDEN_ESTADOS.map((e, i) => {
+					const hecho = i <= actual;
+					return `<li class="flex flex-col gap-1.5"${i === actual ? ' aria-current="step"' : ''}>
+						<span class="h-1.5 rounded-full ${hecho ? DOT[s.estado] : 'bg-slate-200 dark:bg-slate-700'}"></span>
+						<span class="text-xs font-semibold ${hecho ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500'}">${ESTADOS[e].label}${hecho ? '<span class="sr-only"> (completado)</span>' : ''}</span>
+					</li>`;
+				}).join('');
+
+				const datos = [
+					['Fecha y hora', s.fecha],
+					['Tipo', s.tipo],
+					['Titular', s.titular],
+					['Sede o canal', s.sede || 'Mesa de Partes Virtual / Portal Web', 'col-span-2 sm:col-span-3'],
+					['Motivo', s.motivo || '—', 'col-span-2 sm:col-span-3'],
+				];
+				$('[data-cargo-datos]', cargo).innerHTML = datos
+					.map(([k, v, cls]) => `<div${cls ? ` class="${cls}"` : ''}><dt>${k}</dt><dd>${escapeHtml(v)}</dd></div>`)
+					.join('');
+
+				const desc = $('[data-cargo-descripcion]', cargo);
+				desc.textContent = s.descripcion || 'No se registró una observación para esta solicitud.';
+				desc.classList.toggle('italic', !s.descripcion);
+				desc.classList.toggle('text-slate-500', !s.descripcion);
+
+				$('[data-cargo-respuesta-wrap]', cargo).hidden = !s.respuesta;
+				$('[data-cargo-respuesta]', cargo).textContent = s.respuesta || '';
+
+				const nombres = s.archivosNombres?.length ? s.archivosNombres : [];
+				const totalArchivos = nombres.length || Number(s.archivos) || 0;
+				$('[data-cargo-archivos]', cargo).innerHTML = totalArchivos
+					? (nombres.length ? nombres : Array.from({ length: totalArchivos }, (_, i) => `Archivo ${i + 1}`))
+							.map(
+								(n) => `<li class="inline-flex max-w-full items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+									<span class="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-black uppercase text-slate-500 dark:bg-slate-800 dark:text-slate-400">${escapeHtml(n.includes('.') ? n.split('.').pop() : 'doc')}</span>
+									<span class="truncate">${escapeHtml(n)}</span>
+								</li>`,
+							)
+							.join('')
+					: '<li class="text-sm text-slate-500 dark:text-slate-400">Ninguno</li>';
+
+				cargo.showModal();
+			};
+			$('#lr-tabla').addEventListener('click', (e) => {
+				const btn = e.target.closest('[data-cargo]');
+				if (!btn) return;
+				const s = solicitudes.find((x) => x.numero === btn.dataset.cargo);
+				if (s) abrirCargo(s);
+			});
+			cargo.addEventListener('click', (e) => {
+				if (e.target === cargo) cargo.close();
+			});
+			$('[data-cargo-imprimir]', cargo).addEventListener('click', () => {
+				document.body.classList.add('lr-imprimiendo');
+				window.print();
+			});
+			window.addEventListener('afterprint', () => document.body.classList.remove('lr-imprimiendo'));
+
+			// ----- Cambiar de vista -----
+			const tabs = $$('[data-vista]');
+			const mostrarVista = (vista) => {
+				formView.hidden = vista !== 'form';
+				listaView.hidden = vista !== 'lista';
+				tabs.forEach((t) => t.setAttribute('aria-selected', String(t.dataset.vista === vista)));
+				if (vista === 'lista') renderTabla();
+				const url = new URL(location.href);
+				if (vista === 'lista') url.searchParams.set('vista', 'consulta');
+				else url.searchParams.delete('vista');
+				history.replaceState(null, '', url);
+			};
+			tabs.forEach((t) =>
+				t.addEventListener('click', () => {
+					$('#lr-exito').hidden = true;
+					mostrarVista(t.dataset.vista);
+				}),
+			);
+
+			function registrarSolicitud() {
+				const datos = Object.fromEntries(new FormData(form));
+				const max = solicitudes.reduce((m, s) => Math.max(m, Number(s.numero.split('-').pop()) || 0), 0);
+				const numero = `QS-${new Date().getFullYear()}-${String(max + 1).padStart(5, '0')}`;
+				solicitudes.forEach((s) => delete s.nuevo);
+				solicitudes = [
+					{
+						numero,
+						fecha: fechaHora(),
+						tipo: tipoSeleccionado(),
+						titular: datos.tNumDoc,
+						estado: 'registrado',
+						sede: datos.dSede,
+						motivo: datos.dMotivo,
+						descripcion: String(datos.dDescripcion || '').trim(),
+						presentante: datos.pNombre,
+						correo: datos.pCorreo,
+						archivos: archivos.length,
+						archivosNombres: archivos.map((f) => f.name),
+						nuevo: true,
+					},
+					...solicitudes,
+				];
+				guardar();
+
+				$('[data-exito-tipo]').textContent = tipoSeleccionado().toLowerCase();
+				$('[data-exito-numero]').textContent = numero;
+				$('[data-exito-correo]').textContent = datos.pCorreo;
+				$('#lr-exito').hidden = false;
+				buscar.value = '';
+				mostrarVista('lista');
+				sol.toast(`Registramos tu solicitud con el número ${numero}.`, 'success');
+				$('#lr-titulo-lista').setAttribute('tabindex', '-1');
+				$('#lr-exito').scrollIntoView({ behavior: 'smooth', block: 'center' });
+			}
+
+			function resetForm() {
+				form.reset();
+				$$('.field-invalid', form).forEach((el) => setError(el, ''));
+				archivos = [];
+				renderArchivos();
+				errorArchivos.textContent = '';
+				$$('[data-doc-tipo]').forEach(syncDoc);
+				prefillTitular();
+				syncTipo();
+				syncContador();
+				currentStep = 1;
+				updateStepView({ focus: false });
+				$('#lr-exito').hidden = true;
+				mostrarVista('form');
+				formView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			}
+			$('#lr-nueva').addEventListener('click', resetForm);
+
+			// ----- Inicio -----
+			prefillTitular();
+			syncTipo();
+			syncContador();
+			updateStepView({ focus: false });
+			mostrarVista(new URLSearchParams(location.search).get('vista') === 'consulta' ? 'lista' : 'form');
+		})();
+	</script>
+</SolLayout>

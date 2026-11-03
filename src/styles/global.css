@@ -214,6 +214,105 @@ html.theme-transition *::after {
 	color: #fecaca;
 }
 
+.cs-mode-btn {
+	color: #475569;
+}
+
+.cs-mode-btn:hover {
+	color: #0f172a;
+}
+
+.cs-mode-btn[aria-pressed='true'] {
+	background-color: #fff;
+	color: var(--color-sunat-blue);
+	box-shadow: 0 1px 3px rgb(15 23 42 / 0.15);
+}
+
+.dark .cs-mode-btn {
+	color: #94a3b8;
+}
+
+.dark .cs-mode-btn:hover {
+	color: #f1f5f9;
+}
+
+.dark .cs-mode-btn[aria-pressed='true'] {
+	background-color: #0f172a;
+	color: #7dd3fc;
+	box-shadow: 0 1px 3px rgb(0 0 0 / 0.4);
+}
+
+.cs-step {
+	display: flex;
+	min-width: 0;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.cs-step-dot {
+	display: grid;
+	width: 2rem;
+	height: 2rem;
+	flex-shrink: 0;
+	place-items: center;
+	border: 2px solid #cbd5e1;
+	border-radius: 9999px;
+	background: #fff;
+	color: #64748b;
+	font-size: 0.75rem;
+	font-weight: 800;
+	line-height: 1;
+	transition:
+		background-color 150ms,
+		border-color 150ms,
+		color 150ms,
+		box-shadow 150ms;
+}
+
+.cs-step.is-current .cs-step-dot {
+	border-color: var(--color-sunat-blue);
+	background: var(--color-sunat-blue);
+	color: #fff;
+	box-shadow: 0 0 0 4px rgb(0 86 172 / 0.12);
+}
+
+.cs-step.is-done .cs-step-dot {
+	border-color: #059669;
+	background: #059669;
+	color: #fff;
+}
+
+.dark .cs-step-dot {
+	border-color: #475569;
+	background: #0f172a;
+	color: #94a3b8;
+}
+
+.dark .cs-step.is-current .cs-step-dot {
+	border-color: #38bdf8;
+	background: #38bdf8;
+	color: #0f172a;
+	box-shadow: 0 0 0 4px rgb(56 189 248 / 0.15);
+}
+
+.dark .cs-step.is-done .cs-step-dot {
+	border-color: #34d399;
+	background: #059669;
+	color: #fff;
+}
+
+.cs-code {
+	letter-spacing: 0.45em;
+	font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.cs-step-dot,
+	.cs-mode-btn {
+		transition: none;
+	}
+}
+
 .skip-link {
 	position: fixed;
 	top: 0.5rem;

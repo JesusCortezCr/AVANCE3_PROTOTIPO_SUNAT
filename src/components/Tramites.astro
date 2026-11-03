@@ -8,6 +8,13 @@ const tabs = [
 	{ id: 'aduanas', label: 'Aduanas' },
 ] as const;
 
+const urlServicio = (title: string) =>
+	title === 'Obtener clave SOL'
+		? '/clave-sol'
+		: `https://www.gob.pe/busquedas?institucion%5B%5D=sunat&term=${encodeURIComponent(title)}`;
+
+const esExterno = (title: string) => title !== 'Obtener clave SOL';
+
 const services = {
 	personas: [
 		{
@@ -177,7 +184,7 @@ const services = {
 							Entrar con mi Clave SOL
 						</a>
 						<a
-							href="/login"
+							href="/clave-sol"
 							class="inline-flex items-center justify-center gap-2 rounded-lg border border-sunat-blue/30 bg-white px-5 py-3 text-sm font-bold text-sunat-blue transition hover:bg-sky-50 dark:border-sky-700 dark:bg-slate-900 dark:text-sky-300 dark:hover:bg-slate-800"
 						>
 							Crear mi Clave SOL
@@ -201,9 +208,9 @@ const services = {
 								<article class="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-sunat-blue/30 hover:shadow-md dark:border-slate-800 dark:bg-slate-950 dark:hover:border-sky-500/40">
 									<h3 class="text-base font-bold leading-snug text-slate-900 dark:text-slate-100">
 										<a
-											href={`https://www.gob.pe/busquedas?institucion%5B%5D=sunat&term=${encodeURIComponent(service.title)}`}
-											target="_blank"
-											rel="noopener noreferrer"
+											href={urlServicio(service.title)}
+											target={esExterno(service.title) ? '_blank' : undefined}
+											rel={esExterno(service.title) ? 'noopener noreferrer' : undefined}
 											class="hover:text-sunat-blue hover:underline dark:hover:text-sky-300"
 										>
 											{service.title}
@@ -214,15 +221,15 @@ const services = {
 									</p>
 									<div class="mt-5 flex items-center justify-between gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
 										<a
-											href={`https://www.gob.pe/busquedas?institucion%5B%5D=sunat&term=${encodeURIComponent(service.title)}`}
-											target="_blank"
-											rel="noopener noreferrer"
+											href={urlServicio(service.title)}
+											target={esExterno(service.title) ? '_blank' : undefined}
+											rel={esExterno(service.title) ? 'noopener noreferrer' : undefined}
 											class="text-sm font-semibold text-slate-600 hover:text-sunat-blue hover:underline dark:text-slate-400 dark:hover:text-sky-300"
 										>
 											Leer más
 										</a>
 										<a
-											href={service.action === 'Leer más' ? `https://www.gob.pe/busquedas?institucion%5B%5D=sunat&term=${encodeURIComponent(service.title)}` : '/login'}
+											href={service.title === 'Obtener clave SOL' ? '/clave-sol' : service.action === 'Leer más' ? urlServicio(service.title) : '/login'}
 											class="inline-flex items-center gap-1.5 text-sm font-bold text-sunat-blue hover:underline dark:text-sky-400 dark:hover:text-sky-300"
 										>
 											{service.action}

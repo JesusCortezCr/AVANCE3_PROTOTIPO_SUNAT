@@ -123,9 +123,9 @@ export const tramites = {
 		perfiles: [E],
 	},
 	'validez-cpe': {
-		titulo: 'Validar un comprobante de pago',
-		ayuda: 'Comprueba si una factura, boleta o recibo que recibiste es válido y está registrado en SUNAT.',
-		cuando: 'Antes de pagar a un proveedor o usar un comprobante en tu declaración.',
+		titulo: 'Consultar la validez de un comprobante de pago',
+		ayuda: 'Confirma si una factura, boleta, recibo por honorarios, liquidación de compra o nota de crédito o débito existe y fue informada a SUNAT.',
+		cuando: 'Antes de pagar o declarar ese comprobante, para asegurarte de que es válido.',
 		icon: 'shield-check',
 		perfiles: [P, E],
 	},
@@ -458,6 +458,7 @@ export const accesosDirectos: Record<Perfil, TramiteId[]> = {
 	personas: [
 		'emitir-rhe',
 		'consultar-rhe',
+		'validez-cpe',
 		'declara-paga',
 		'consulta-devoluciones',
 		'suspension-4ta',

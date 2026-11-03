@@ -4,7 +4,7 @@ import ThemeToggle from '../ThemeToggle.astro';
 import type { IconName } from '../../data/icons';
 
 interface Props {
-	current: 'inicio' | 'perfil';
+	current: 'inicio' | 'perfil' | 'validez' | 'favoritas' | 'reclamos';
 }
 
 const { current } = Astro.props;
@@ -12,6 +12,7 @@ const { current } = Astro.props;
 const navItems: { id: string; label: string; href: string; icon: IconName; badge?: string }[] = [
 	{ id: 'inicio', label: 'Inicio', href: '/sol', icon: 'home' },
 	{ id: 'buzon', label: 'Buzón electrónico', href: '/sol#buzon', icon: 'inbox', badge: '2' },
+	{ id: 'favoritas', label: 'Favoritas', href: '/operaciones-favoritas', icon: 'star' },
 	{ id: 'perfil', label: 'Mi perfil', href: '/perfil', icon: 'user' },
 ];
 ---
@@ -27,6 +28,20 @@ const navItems: { id: string; label: string; href: string; icon: IconName; badge
 					<span class="block text-[11px] font-semibold uppercase tracking-wider text-white/80">Operaciones en línea</span>
 				</span>
 			</a>
+
+			{
+				current !== 'inicio' && (
+					<button
+						type="button"
+						data-volver
+						class="ml-1 inline-flex h-10 shrink-0 items-center gap-2 rounded-lg border border-white/30 bg-white/10 px-2.5 text-sm font-bold text-white transition hover:bg-white/20 sm:px-3"
+					>
+						<Icon name="arrow-left" size={18} />
+						<span class="hidden sm:inline">Volver</span>
+						<span class="sr-only sm:hidden">Volver a la página anterior</span>
+					</button>
+				)
+			}
 
 			<nav aria-label="Navegación de mi cuenta" class="ml-6 hidden items-center gap-1 lg:flex">
 				{

@@ -5,14 +5,13 @@ import SolLayout from '../layouts/SolLayout.astro';
 import { accesosDirectos, categorias, perfiles } from '../data/sol';
 import type { IconName } from '../data/icons';
 
-const accionesRapidas: { label: string; id: string; icon: IconName }[] = [
-	{ label: 'Declarar y pagar', id: 'declara-paga', icon: 'credit-card' },
-	{ label: 'Emitir comprobante', id: 'emitir-rhe', icon: 'receipt' },
-	{ label: 'Ver Ficha RUC', id: 'ficha-ruc', icon: 'id-card' },
-	{ label: 'Consultar deudas', id: 'valores-pendientes', icon: 'alert-triangle' },
-];
-
 const sugerencias = ['recibo', 'declarar', 'devolución', 'factura', 'deuda', 'RUC'];
+
+const pasos = [
+	{ titulo: 'Busca', detalle: 'Escribe el trámite o lo que quieres lograr.' },
+	{ titulo: 'Entiende', detalle: 'Lee qué es y cuándo te conviene usarlo.' },
+	{ titulo: 'Realiza', detalle: 'Ábrelo y sigue las indicaciones en pantalla.' },
+];
 
 const mensajes = [
 	{
@@ -42,81 +41,37 @@ const mensajes = [
 <SolLayout title="Menú SOL" description="Tus trámites y servicios de SUNAT con Clave SOL." current="inicio">
 	<!-- Bienvenida -->
 	<section class="sol-hero relative overflow-hidden text-white" aria-labelledby="titulo-bienvenida">
-		<div class="container-sunat relative grid gap-8 py-8 md:py-10 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-center">
-			<div class="flex flex-col gap-5 sm:flex-row sm:items-center">
+		<div class="container-sunat relative grid gap-5 py-8 md:py-10 md:pb-12">
+			<div class="flex items-center gap-4 sm:gap-5">
 				<div class="relative w-fit shrink-0">
-					<span class="grid h-20 w-20 place-items-center rounded-3xl bg-white text-3xl font-black text-sunat-red shadow-xl ring-4 ring-white/25 dark:bg-sky-400 dark:text-slate-950 md:h-24 md:w-24 md:text-4xl" data-sol-field="iniciales">S</span>
+					<span class="grid h-16 w-16 place-items-center rounded-3xl bg-white text-2xl font-black text-sunat-red shadow-xl ring-4 ring-white/25 dark:bg-sky-400 dark:text-slate-950 sm:h-20 sm:w-20 sm:text-3xl" data-sol-field="iniciales">S</span>
 					<span class="absolute -bottom-1 -right-1 grid h-7 w-7 place-items-center rounded-full bg-emerald-500 ring-4 ring-sunat-red dark:ring-slate-900" title="Sesión verificada">
 						<Icon name="check" size={15} strokeWidth={3} />
 					</span>
 				</div>
 				<div class="min-w-0">
 					<p class="text-sm font-semibold text-white/85"><span id="saludo">Hola</span> 👋</p>
-					<h1 id="titulo-bienvenida" class="mt-1 text-3xl font-black tracking-tight md:text-4xl">
+					<h1 id="titulo-bienvenida" class="mt-1 text-2xl font-black tracking-tight sm:text-3xl md:text-4xl">
 						<span data-sol-field="nombres">Bienvenido</span>
 					</h1>
-					<p class="mt-1 text-sm text-white/80" data-sol-field="nombreCompleto">—</p>
-					<ul class="mt-4 flex flex-wrap gap-2 text-xs font-semibold" aria-label="Datos de tu sesión">
+					<p class="mt-1 truncate text-sm text-white/80" data-sol-field="nombreCompleto">—</p>
+					<ul class="mt-3 flex flex-wrap gap-2 text-xs font-semibold" aria-label="Datos de tu sesión">
 						<li class="sol-chip"><Icon name="id-card" size={14} />RUC <span data-sol-field="ruc">—</span></li>
-						<li class="sol-chip"><Icon name="user" size={14} />Usuario <span data-sol-field="usuario">—</span></li>
 						<li class="sol-chip"><Icon name="briefcase" size={14} /><span data-sol-field="tipo">—</span></li>
-						<li class="sol-chip"><Icon name="clock" size={14} />Ingreso: <span data-sol-field="ingreso">—</span></li>
 					</ul>
 				</div>
 			</div>
 
-			<ul class="grid grid-cols-3 gap-3" aria-label="Estado de tu cuenta">
-				<li class="sol-stat">
-					<Icon name="map-pin" size={20} class="text-emerald-300" />
-					<span class="text-[11px] font-semibold uppercase tracking-wide text-white/75">Domicilio</span>
-					<strong class="text-base" data-sol-field="condicion">Habido</strong>
-				</li>
-				<li class="sol-stat">
-					<Icon name="shield-check" size={20} class="text-emerald-300" />
-					<span class="text-[11px] font-semibold uppercase tracking-wide text-white/75">RUC</span>
-					<strong class="text-base" data-sol-field="estado">Activo</strong>
-				</li>
-				<li>
-					<a href="#buzon" class="sol-stat h-full transition hover:bg-white/20">
-						<Icon name="inbox" size={20} class="text-amber-300" />
-						<span class="text-[11px] font-semibold uppercase tracking-wide text-white/75">Buzón</span>
-						<strong class="text-base"><span data-buzon-count>2</span> <span data-buzon-plural>nuevos</span></strong>
-					</a>
-				</li>
-			</ul>
 		</div>
 	</section>
 
-	<div class="container-sunat -mt-5 relative z-10">
-		<nav aria-label="Acciones frecuentes" class="rounded-2xl border border-slate-200 bg-white p-2 shadow-lg dark:border-slate-800 dark:bg-slate-900">
-			<ul class="grid grid-cols-2 gap-1 md:grid-cols-4">
-				{
-					accionesRapidas.map((accion) => (
-						<li>
-							<button
-								type="button"
-								data-quick={accion.id}
-								class="flex h-14 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-bold text-slate-800 transition hover:bg-sky-50 hover:text-sunat-blue dark:text-slate-100 dark:hover:bg-slate-800 dark:hover:text-sky-300"
-							>
-								<span class="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-sunat-red/10 text-sunat-red dark:bg-rose-500/15 dark:text-rose-300">
-									<Icon name={accion.icon} size={18} />
-								</span>
-								{accion.label}
-							</button>
-						</li>
-					))
-				}
-			</ul>
-		</nav>
-	</div>
-
 	<div class="container-sunat mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
 		<div class="min-w-0">
-			<!-- Buscador -->
+			<!-- Buscador y guía rápida -->
 			<section aria-labelledby="titulo-buscar">
 				<h2 id="titulo-buscar" class="text-2xl font-bold text-slate-900 dark:text-white">¿Qué necesitas hacer hoy?</h2>
 				<p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-					Escribe con tus propias palabras, por ejemplo “recibo”, “pagar” o “devolución”.
+					Escribe con tus propias palabras, por ejemplo “recibo”, “pagar” o “devolución”. No necesitas recordar el nombre exacto.
 				</p>
 				<div role="search" class="relative mt-4">
 					<label for="sol-buscar" class="sr-only">Buscar un trámite o servicio</label>
@@ -127,11 +82,11 @@ const mensajes = [
 						autocomplete="off"
 						placeholder="Buscar trámites, consultas y formularios…"
 						aria-describedby="sol-buscar-ayuda"
-						class="h-14 w-full rounded-2xl border border-slate-300 bg-white pl-12 pr-24 text-base text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-sunat-blue dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+						class="h-14 w-full rounded-2xl border border-slate-300 bg-white pl-12 pr-4 text-base text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-sunat-blue sm:pr-24 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
 					/>
-					<kbd class="pointer-events-none absolute right-4 top-1/2 hidden -translate-y-1/2 rounded-md border border-slate-300 bg-slate-50 px-2 py-0.5 text-xs font-semibold text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 sm:block" title="Atajo de teclado">/</kbd>
+					<kbd class="pointer-events-none absolute right-4 top-1/2 hidden -translate-y-1/2 rounded-md border border-slate-300 bg-slate-50 px-2 py-0.5 text-xs font-semibold text-slate-500 sm:block dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400" title="Atajo de teclado">/</kbd>
 				</div>
-				<p id="sol-buscar-ayuda" class="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+				<div id="sol-buscar-ayuda" class="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
 					<span>Búsquedas comunes:</span>
 					{
 						sugerencias.map((s) => (
@@ -140,18 +95,30 @@ const mensajes = [
 							</button>
 						))
 					}
-				</p>
+				</div>
 				<p id="sol-buscar-estado" role="status" aria-live="polite" class="mt-3 text-sm font-semibold text-slate-700 dark:text-slate-300"></p>
+
+				<ol class="mt-4 grid gap-2 sm:grid-cols-3" aria-label="Cómo hacer un trámite" data-ocultar-en-busqueda>
+					{
+						pasos.map((paso, index) => (
+							<li class="flex items-start gap-2.5 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
+								<span class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-sunat-blue/10 text-xs font-black text-sunat-blue dark:bg-sky-500/15 dark:text-sky-300">
+									{index + 1}
+								</span>
+								<span class="min-w-0">
+									<strong class="block text-sm text-slate-900 dark:text-white">{paso.titulo}</strong>
+									<span class="mt-0.5 block text-xs leading-snug text-slate-500 dark:text-slate-400">{paso.detalle}</span>
+								</span>
+							</li>
+						))
+					}
+				</ol>
 			</section>
 
 			<!-- Selector de perfil -->
 			<section class="mt-8" aria-labelledby="titulo-perfil" data-ocultar-en-busqueda>
-				<div class="flex flex-wrap items-end justify-between gap-2">
-					<div>
-						<h2 id="titulo-perfil" class="text-lg font-bold text-slate-900 dark:text-white">¿Para quién es el trámite?</h2>
-						<p class="text-sm text-slate-600 dark:text-slate-400">Mostramos solo las opciones que te corresponden.</p>
-					</div>
-				</div>
+				<h2 id="titulo-perfil" class="text-lg font-bold text-slate-900 dark:text-white">¿Para quién es el trámite?</h2>
+				<p class="text-sm text-slate-600 dark:text-slate-400">Elige tu caso y te mostramos solo las opciones que te corresponden.</p>
 				<div class="mt-3 grid gap-2 sm:grid-cols-3" role="group" aria-label="Perfil de trámites">
 					{
 						perfiles.map((perfil) => (
@@ -176,16 +143,11 @@ const mensajes = [
 
 			<!-- Accesos directos -->
 			<section class="mt-8" aria-labelledby="titulo-accesos" data-ocultar-en-busqueda>
-				<div class="flex items-center justify-between gap-2">
-					<h2 id="titulo-accesos" class="text-lg font-bold text-slate-900 dark:text-white">Accesos directos</h2>
-					<p class="hidden text-xs text-slate-500 dark:text-slate-400 sm:flex sm:items-center sm:gap-1">
-						<Icon name="info" size={14} />
-						Pasa el cursor o toca <Icon name="help-circle" size={14} /> para saber de qué trata.
-					</p>
-				</div>
+				<h2 id="titulo-accesos" class="text-lg font-bold text-slate-900 dark:text-white">Accesos directos</h2>
+				<p class="text-sm text-slate-600 dark:text-slate-400">Atajos a los trámites más frecuentes. Toca una tarjeta para abrirla.</p>
 				{
 					perfiles.map((perfil) => (
-						<ul class="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4" data-accesos={perfil.id} hidden={perfil.id !== 'personas'}>
+						<ul class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3" data-accesos={perfil.id} hidden={perfil.id !== 'personas'}>
 							{accesosDirectos[perfil.id].map((id) => (
 								<Tramite id={id} uid={`acc-${perfil.id}-${id}`} variant="card" />
 							))}
@@ -196,10 +158,15 @@ const mensajes = [
 
 			<!-- Todas las opciones -->
 			<section class="mt-10" aria-labelledby="titulo-opciones">
-				<div class="flex flex-wrap items-center justify-between gap-2">
-					<h2 id="titulo-opciones" class="text-lg font-bold text-slate-900 dark:text-white">
-						<span data-titulo-opciones>Todas las opciones</span>
-					</h2>
+				<div class="flex flex-wrap items-end justify-between gap-2">
+					<div>
+						<h2 id="titulo-opciones" class="text-lg font-bold text-slate-900 dark:text-white">
+							<span data-titulo-opciones>Explora por tema</span>
+						</h2>
+						<p class="text-sm text-slate-600 dark:text-slate-400" data-ocultar-en-busqueda>
+							Si no sabes el nombre exacto, abre un tema y elige el trámite.
+						</p>
+					</div>
 					<div class="flex gap-2 text-xs font-bold" data-ocultar-en-busqueda>
 						<button type="button" data-expandir="true" class="link-sunat">Abrir todo</button>
 						<span class="text-slate-300 dark:text-slate-700" aria-hidden="true">|</span>
@@ -209,8 +176,8 @@ const mensajes = [
 
 				<div class="mt-3 grid items-start gap-3 md:grid-cols-2">
 					{
-						categorias.map((categoria, index) => (
-							<details class="sol-categoria rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900" data-categoria open={index < 2}>
+						categorias.map((categoria) => (
+							<details class="sol-categoria rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900" data-categoria>
 								<summary class="flex cursor-pointer list-none items-center gap-3 rounded-2xl p-4 transition hover:bg-slate-50 dark:hover:bg-slate-800/60">
 									<span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-sunat-blue/10 text-sunat-blue dark:bg-sky-500/15 dark:text-sky-300">
 										<Icon name={categoria.icon} size={20} />
@@ -248,76 +215,23 @@ const mensajes = [
 		</div>
 
 		<!-- Columna lateral -->
-		<aside class="grid content-start gap-5" aria-label="Tu actividad">
-			<section id="buzon" class="sol-panel scroll-mt-36" aria-labelledby="titulo-buzon">
-				<div class="flex items-center justify-between">
-					<h2 id="titulo-buzon" class="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
-						<Icon name="inbox" size={19} class="text-sunat-blue dark:text-sky-300" />
-						Buzón electrónico
-					</h2>
-					<span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-900 dark:bg-amber-500/20 dark:text-amber-200"><span data-buzon-count>2</span> <span data-buzon-plural>nuevos</span></span>
-				</div>
-				<ul class="mt-3 grid gap-2">
-					{
-						mensajes.map((m) => (
-							<li>
-								<details class="sol-mensaje group rounded-xl border border-slate-200 dark:border-slate-800" data-mensaje={m.id} data-nuevo={m.nuevo ? 'true' : 'false'}>
-									<summary class="flex cursor-pointer list-none gap-2 p-3">
-										<span class="sol-mensaje-punto mt-1.5 h-2 w-2 shrink-0 rounded-full" aria-hidden="true"></span>
-										<span class="min-w-0">
-											<span class="sol-mensaje-asunto block text-sm leading-snug text-slate-800 dark:text-slate-200">{m.asunto}</span>
-											<span class="text-xs text-slate-500 dark:text-slate-400">
-												{m.fecha}
-												<span class="sol-mensaje-estado sr-only">{m.nuevo ? ' · sin leer' : ' · leído'}</span>
-											</span>
-										</span>
-									</summary>
-									<p class="border-t border-slate-100 px-3 py-2 text-sm text-slate-600 dark:border-slate-800 dark:text-slate-300">{m.texto}</p>
-								</details>
-							</li>
-						))
-					}
-				</ul>
-			</section>
-
-			<section class="sol-panel" aria-labelledby="titulo-favoritos">
-				<h2 id="titulo-favoritos" class="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
+		<aside class="grid content-start gap-4" aria-label="Tu actividad">
+			<section class="sol-panel" aria-labelledby="titulo-accesos-guardados">
+				<h2 id="titulo-accesos-guardados" class="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
 					<Icon name="star" size={19} class="text-amber-500" />
-					Mis favoritos
+					Tus accesos
 				</h2>
-				<ul id="lista-favoritos" class="mt-3 grid gap-1"></ul>
+				<p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Lo que guardaste y lo que abriste hace poco.</p>
+
+				<h3 class="mt-4 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Favoritos</h3>
+				<ul id="lista-favoritos" class="mt-2 grid gap-1"></ul>
 				<p id="favoritos-vacio" class="mt-2 text-sm text-slate-500 dark:text-slate-400">
 					Aún no tienes favoritos. Toca la estrella <Icon name="star" size={13} class="inline" /> de un trámite para tenerlo siempre a mano.
 				</p>
-			</section>
 
-			<section class="sol-panel" aria-labelledby="titulo-ultimos">
-				<h2 id="titulo-ultimos" class="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
-					<Icon name="history" size={19} class="text-sunat-blue dark:text-sky-300" />
-					Últimos accesos
-				</h2>
-				<ul id="lista-ultimos" class="mt-3 grid gap-1"></ul>
+				<h3 class="mt-4 border-t border-slate-100 pt-4 text-xs font-bold uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:text-slate-400">Últimos accesos</h3>
+				<ul id="lista-ultimos" class="mt-2 grid gap-1"></ul>
 				<p id="ultimos-vacio" class="mt-2 text-sm text-slate-500 dark:text-slate-400">Aquí verás los trámites que abriste recientemente.</p>
-			</section>
-
-			<section class="sol-panel" aria-labelledby="titulo-vencimientos">
-				<h2 id="titulo-vencimientos" class="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
-					<Icon name="calendar" size={19} class="text-sunat-red dark:text-rose-300" />
-					Tus vencimientos
-				</h2>
-				<p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
-					Tus fechas dependen del último dígito de tu RUC:
-					<strong class="text-slate-900 dark:text-white" id="ultimo-digito">—</strong>.
-				</p>
-				<a
-					href="https://www.sunat.gob.pe/orientacion/cronogramas/"
-					target="_blank"
-					rel="noopener noreferrer"
-					class="link-sunat mt-3 inline-flex items-center gap-1 text-sm"
-				>
-					Ver cronograma de obligaciones <Icon name="external-link" size={14} />
-					<span class="sr-only">(se abre en una pestaña nueva)</span>
-				</a>
 			</section>
 
 			<section class="rounded-2xl bg-gradient-to-br from-sunat-blue to-sunat-blue-dark p-5 text-white shadow-lg dark:from-sky-900 dark:to-slate-900" aria-labelledby="titulo-ayuda">
@@ -333,6 +247,75 @@ const mensajes = [
 			</section>
 		</aside>
 	</div>
+
+	<!-- Botones flotantes: libro de reclamaciones y buzón -->
+	<div class="pointer-events-none fixed bottom-4 right-4 z-40 flex w-[calc(100vw-2rem)] max-w-sm flex-col items-end gap-3 sm:bottom-6 sm:right-6">
+		<a
+			href="/libro-reclamaciones"
+			class="pointer-events-auto flex items-center gap-2.5 rounded-2xl border border-slate-200 bg-white py-2.5 pl-2.5 pr-4 text-sm font-bold text-slate-800 shadow-xl transition hover:-translate-y-0.5 hover:border-sunat-blue hover:text-sunat-blue dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-sky-400 dark:hover:text-sky-300"
+		>
+			<span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-sunat-blue/10 text-sunat-blue dark:bg-sky-500/15 dark:text-sky-300">
+				<Icon name="book-open" size={19} />
+			</span>
+			Libro de reclamaciones
+		</a>
+		<button
+			type="button"
+			data-abrir-buzon
+			aria-haspopup="dialog"
+			aria-controls="buzon"
+			class="sol-buzon-fab animate-hop pointer-events-auto flex w-full items-center gap-3 rounded-2xl bg-sunat-red p-3 pr-4 text-left text-white shadow-2xl ring-4 ring-white/70 transition hover:bg-sunat-red/90 focus-visible:outline-none focus-visible:ring-sky-400 dark:bg-slate-800 dark:ring-slate-700 dark:hover:bg-slate-700"
+		>
+			<span class="relative grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-amber-300/25 text-amber-200">
+				<Icon name="inbox" size={22} />
+				<span data-buzon-badge class="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-amber-300 px-1 text-[11px] font-black text-amber-950">2</span>
+			</span>
+			<span class="min-w-0 flex-1">
+				<span class="block text-sm font-bold">
+					Tienes <span data-buzon-count>2</span> <span data-buzon-plural>nuevos</span> en tu buzón
+				</span>
+				<span class="mt-0.5 block text-xs leading-snug text-white/80">Son avisos oficiales de SUNAT. Toca aquí para leerlos.</span>
+			</span>
+		</button>
+	</div>
+
+	<!-- Mensajes del buzón -->
+	<dialog
+		id="buzon"
+		aria-labelledby="titulo-buzon"
+		class="m-auto w-[calc(100%-2rem)] max-w-lg rounded-2xl border border-slate-200 bg-white p-0 text-slate-900 shadow-2xl backdrop:bg-slate-950/50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
+	>
+		<div class="flex items-center justify-between gap-2 border-b border-slate-100 p-4 dark:border-slate-800">
+			<h2 id="titulo-buzon" class="flex items-center gap-2 font-bold">
+				<Icon name="inbox" size={19} class="text-sunat-blue dark:text-sky-300" />
+				Buzón electrónico
+			</h2>
+			<form method="dialog">
+				<button class="grid h-9 w-9 place-items-center rounded-full text-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Cerrar buzón">×</button>
+			</form>
+		</div>
+		<ul class="grid max-h-[70vh] gap-2 overflow-y-auto p-4">
+			{
+				mensajes.map((m) => (
+					<li>
+						<details class="sol-mensaje group rounded-xl border border-slate-200 dark:border-slate-800" data-mensaje={m.id} data-nuevo={m.nuevo ? 'true' : 'false'}>
+							<summary class="flex cursor-pointer list-none gap-2 p-3">
+								<span class="sol-mensaje-punto mt-1.5 h-2 w-2 shrink-0 rounded-full" aria-hidden="true"></span>
+								<span class="min-w-0">
+									<span class="sol-mensaje-asunto block text-sm leading-snug text-slate-800 dark:text-slate-200">{m.asunto}</span>
+									<span class="text-xs text-slate-500 dark:text-slate-400">
+										{m.fecha}
+										<span class="sol-mensaje-estado sr-only">{m.nuevo ? ' · sin leer' : ' · leído'}</span>
+									</span>
+								</span>
+							</summary>
+							<p class="border-t border-slate-100 px-3 py-2 text-sm text-slate-600 dark:border-slate-800 dark:text-slate-300">{m.texto}</p>
+						</details>
+					</li>
+				))
+			}
+		</ul>
+	</dialog>
 
 	<script is:inline>
 		(() => {
@@ -359,7 +342,6 @@ const mensajes = [
 			const hour = new Date().getHours();
 			document.querySelector('#saludo').textContent =
 				hour < 12 ? 'Buenos días' : hour < 19 ? 'Buenas tardes' : 'Buenas noches';
-			document.querySelector('#ultimo-digito').textContent = sol.session.ruc.slice(-1);
 
 			const items = [...document.querySelectorAll('[data-tramite]')];
 			const titles = Object.fromEntries(items.map((li) => [li.dataset.id, li.dataset.titulo]));
@@ -426,12 +408,21 @@ const mensajes = [
 				sol.toast(on ? `Quitaste «${titles[id]}» de tus favoritos.` : `Agregaste «${titles[id]}» a tus favoritos.`, 'success');
 			};
 
+			const rutasTramite = {
+				'validez-cpe': '/validez-comprobante',
+				'emitir-rhe': '/emitir-rhe',
+			};
+
 			const abrirTramite = (id) => {
 				ultimos = [id, ...ultimos.filter((u) => u !== id)].slice(0, 5);
 				write(LAST_KEY, ultimos);
 				renderUltimos();
 				if (id === 'buzon') {
-					document.querySelector('#buzon').scrollIntoView({ behavior: 'smooth' });
+					abrirBuzon();
+					return;
+				}
+				if (rutasTramite[id]) {
+					location.href = rutasTramite[id];
 					return;
 				}
 				sol.toast(`Abriendo «${titles[id]}»… (simulación del prototipo)`);
@@ -460,7 +451,6 @@ const mensajes = [
 				if (target.closest('[data-fav]')) toggleFavorito(li.dataset.id);
 				else if (target.closest('[data-open]')) abrirTramite(li.dataset.id);
 				else if (target.closest('[data-abrir]')) abrirTramite(target.closest('[data-abrir]').dataset.abrir);
-				else if (target.closest('[data-quick]')) abrirTramite(target.closest('[data-quick]').dataset.quick);
 				else if (target.closest('[data-quitar-fav]')) toggleFavorito(target.closest('[data-quitar-fav]').dataset.quitarFav);
 			});
 
@@ -491,7 +481,7 @@ const mensajes = [
 				document.querySelectorAll('[data-ocultar-en-busqueda]').forEach((el) => (el.hidden = buscando));
 				document.querySelector('[data-titulo-opciones]').textContent = buscando
 					? 'Resultados en todos los perfiles'
-					: `Todas las opciones · ${perfilButtons.find((b) => b.dataset.perfil === perfil).querySelector('.font-bold').textContent}`;
+					: `Explora por tema · ${perfilButtons.find((b) => b.dataset.perfil === perfil).querySelector('.font-bold').textContent}`;
 
 				categoriasEl.forEach((categoria) => {
 					let visibles = 0;
@@ -575,7 +565,22 @@ const mensajes = [
 					el.textContent = String(nuevos);
 					el.hidden = nuevos === 0;
 				});
+				document.querySelector('[data-abrir-buzon]').classList.toggle('animate-hop', nuevos > 0);
 			};
+
+			const buzonDialog = document.querySelector('#buzon');
+			function abrirBuzon() {
+				if (!buzonDialog.open) buzonDialog.showModal();
+			}
+			document.querySelector('[data-abrir-buzon]').addEventListener('click', abrirBuzon);
+			buzonDialog.addEventListener('click', (event) => {
+				if (event.target === buzonDialog) buzonDialog.close();
+			});
+			buzonDialog.addEventListener('close', () => {
+				if (location.hash === '#buzon') history.replaceState(null, '', location.pathname + location.search);
+			});
+			const abrirSiHash = () => location.hash === '#buzon' && abrirBuzon();
+			window.addEventListener('hashchange', abrirSiHash);
 			document.querySelectorAll('[data-mensaje]').forEach((m) =>
 				m.addEventListener('toggle', () => {
 					if (m.open && !leidos.includes(m.dataset.mensaje)) {
@@ -590,6 +595,7 @@ const mensajes = [
 			syncFavoritos();
 			renderUltimos();
 			syncBuzon();
+			abrirSiHash();
 		})();
 	</script>
 </SolLayout>

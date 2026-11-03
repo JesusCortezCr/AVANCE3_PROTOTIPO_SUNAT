@@ -6,7 +6,7 @@ import SolFooter from '../components/sol/SolFooter.astro';
 interface Props {
 	title: string;
 	description?: string;
-	current: 'inicio' | 'perfil';
+	current: 'inicio' | 'perfil' | 'validez' | 'favoritas' | 'reclamos';
 }
 
 const { title, description, current } = Astro.props;
@@ -75,6 +75,14 @@ const { title, description, current } = Astro.props;
 			};
 
 			window.sunatSol = { session, fields, logout, toast };
+
+			// Botón «Volver» disponible en todas las operaciones.
+			document.addEventListener('click', (event) => {
+				const target = event.target instanceof Element ? event.target : null;
+				if (!target?.closest('[data-volver]')) return;
+				if (history.length > 1 && document.referrer) history.back();
+				else location.href = '/sol';
+			});
 
 			document.addEventListener('DOMContentLoaded', () => {
 				document.querySelectorAll('[data-sol-field]').forEach((element) => {
