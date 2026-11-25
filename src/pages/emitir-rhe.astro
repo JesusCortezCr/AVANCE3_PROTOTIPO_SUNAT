@@ -70,6 +70,37 @@ const mediosPago = [
 			</details>
 		</div>
 
+		<!-- Asistente con IA -->
+		<section id="ia-rhe" class="sol-panel mt-5 border-sky-300 dark:border-sky-800" aria-labelledby="ia-rhe-titulo">
+			<h2 id="ia-rhe-titulo" class="flex flex-wrap items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
+				<Icon name="message" size={20} class="text-sunat-blue dark:text-sky-300" />Cuéntanos tu caso y la IA llena el recibo por ti
+				<span class="rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-sunat-blue dark:bg-sky-950 dark:text-sky-300">IA</span>
+			</h2>
+			<p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+				Escribe con tus palabras qué trabajo hiciste, para quién, cuánto cobras y cómo te pagan. Lo que no menciones se completa
+				automáticamente, y <strong>podrás revisar y cambiar todo</strong> antes de emitir.
+			</p>
+			<label for="ia-caso" class="sr-only">Describe tu caso</label>
+			<textarea
+				id="ia-caso"
+				rows="3"
+				maxlength="3000"
+				class="sol-input mt-3 h-auto py-2"
+				placeholder="Ej.: Le hice una página web a la empresa Inversiones Andinas, RUC 20601234567, por 2500 soles. Me pagó hoy por transferencia."
+			></textarea>
+			<div class="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+				<button type="button" id="ia-llenar" class="sol-btn-primary"><Icon name="edit" size={16} /><span id="ia-llenar-texto">Llenar el recibo con IA</span></button>
+				<p class="text-xs text-slate-500 dark:text-slate-400">
+					Tu texto se procesa con IA (Claude, de Anthropic) solo para llenar este formulario. No incluyas tu Clave SOL.
+				</p>
+			</div>
+			<div id="ia-resultado" hidden class="mt-4 rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm dark:border-sky-900 dark:bg-sky-950/40" aria-live="polite">
+				<p id="ia-resumen" class="font-semibold text-slate-800 dark:text-slate-100"></p>
+				<ul id="ia-avisos" class="mt-2 list-disc space-y-1 pl-5 text-slate-700 dark:text-slate-300"></ul>
+				<p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Los campos que llenó la IA están resaltados en celeste. Revísalos antes de emitir.</p>
+			</div>
+		</section>
+
 		<!-- Progreso -->
 		<section id="progreso" class="sol-panel mt-5 scroll-mt-24" aria-label="Progreso de la emisión">
 			<div class="flex flex-wrap items-end justify-between gap-2">
@@ -741,6 +772,11 @@ const mediosPago = [
 		}
 		.dark .sol-field-msg[data-tono='info'] {
 			color: #94a3b8;
+		}
+		.ia-llenado,
+		.sol-opcion:has(input.ia-llenado:checked) > span {
+			box-shadow: 0 0 0 3px rgb(14 165 233 / 0.35);
+			border-color: #0ea5e9;
 		}
 		.sol-input[aria-invalid='true'] {
 			border-color: #dc2626;
@@ -1727,6 +1763,181 @@ const mediosPago = [
 				'success',
 			);
 		};
+
+		/* ---------- asistente con IA: llenar desde el caso en lenguaje natural ---------- */
+		const iaBoton = $('#ia-llenar');
+		const iaResaltar = (...ids) => ids.forEach((id) => document.getElementById(id)?.classList.add('ia-llenado'));
+		const iaResaltarRadio = (name) => document.querySelector(`input[name="${name}"]:checked`)?.classList.add('ia-llenado');
+
+		const aplicarIA = async (d) => {
+			const avisos = [...(d.avisos || [])];
+			$$('.ia-llenado').forEach((el) => el.classList.remove('ia-llenado'));
+			const radio = (name, v) => {
+				if (!v) return;
+				marcar(name, v);
+				iaResaltarRadio(name);
+			};
+
+			// Paso 1
+			radio('formaPago', d.formaPago);
+			radio('deduccion', d.deduccion);
+			actualizarCondicionales();
+
+			// Paso 2: cliente
+			clienteValidado = false;
+			if (d.clienteTipoDoc && !$(`#tipoDoc option[value="${d.clienteTipoDoc}"]`)?.disabled) {
+				$('#tipoDoc').value = d.clienteTipoDoc;
+				iaResaltar('tipoDoc');
+				actualizarCondicionales();
+				const num = (d.clienteNumDoc || '').replace(/[\s.-]/g, '').toUpperCase();
+				if (num && d.clienteTipoDoc !== '-') {
+					$('#numDoc').value = num;
+					iaResaltar('numDoc');
+				}
+				if (d.clienteNombre) {
+					$('#nombreCliente').value = d.clienteNombre.toUpperCase();
+					iaResaltar('nombreCliente');
+				}
+				const busca = d.clienteTipoDoc === '1' || d.clienteTipoDoc === '6';
+				if (busca && num && !reglaDoc(d.clienteTipoDoc, num)) {
+					if (d.clienteNombre) {
+						clienteValidado = true;
+						mensaje('numDoc', 'Datos tomados de tu descripción. Verifícalos.', 'info');
+					} else {
+						await buscarCliente();
+						iaResaltar('nombreCliente');
+					}
+				} else if (busca && num) mensaje('numDoc', reglaDoc(d.clienteTipoDoc, num));
+			}
+			const dep = $$('#departamento option').find((o) => o.value && normalizar(o.value) === normalizar(d.departamento));
+			if (dep) {
+				$('#departamento').value = dep.value;
+				iaResaltar('departamento');
+			}
+			if (d.direccion) {
+				$('#direccion').value = d.direccion.toUpperCase();
+				iaResaltar('direccion');
+			}
+			radio('paciente', d.paciente);
+			if (d.pacienteTipoDoc) {
+				$('#pacTipo').value = d.pacienteTipoDoc;
+				iaResaltar('pacTipo');
+			}
+			if (d.pacienteNumDoc) {
+				$('#pacNum').value = d.pacienteNumDoc.toUpperCase();
+				iaResaltar('pacNum');
+			}
+			if (d.pacienteNombre) {
+				$('#pacNombre').value = d.pacienteNombre.toUpperCase();
+				iaResaltar('pacNombre');
+			}
+
+			// Paso 3: servicio
+			radio('gratuito', d.gratuito);
+			if (d.descripcion) {
+				const texto = d.descripcion.toUpperCase().slice(0, 500);
+				$('#descripcion').value = texto;
+				$('#descripcion-cuenta').textContent = String(texto.length);
+				iaResaltar('descripcion');
+			}
+			if (d.observacion) {
+				$('#observacion').value = d.observacion.toUpperCase().slice(0, 500);
+				iaResaltar('observacion');
+			}
+			if (d.fechaEmision) {
+				if (d.fechaEmision >= hoyISO(-2) && d.fechaEmision <= hoyISO()) {
+					$('#fechaEmision').value = d.fechaEmision;
+					iaResaltar('fechaEmision');
+				} else avisos.push(`La fecha ${fechaTexto(d.fechaEmision)} no está permitida (solo hoy o hasta 2 días antes); dejamos la fecha de hoy.`);
+			}
+			radio('inciso', d.inciso);
+
+			// Paso 4: montos
+			if (d.moneda) {
+				$('#moneda').value = d.moneda;
+				iaResaltar('moneda');
+			}
+			if (Number.isFinite(numero(d.monto)) && numero(d.monto) > 0) {
+				$('#monto').value = numero(d.monto).toFixed(2);
+				iaResaltar('monto');
+			}
+			retencionTocada = Boolean(d.retencion);
+			radio('retencion', d.retencion);
+			radio('pagoAhora', d.pagoAhora);
+			actualizarCondicionales();
+			if (d.medioPago && valor('pagoAhora') === 'si') {
+				$('#medioPago').value = d.medioPago;
+				iaResaltar('medioPago');
+			}
+			if (!retencionTocada) {
+				// Automático: igual que el formulario (RUC 20 → retención), según el tipo de cliente.
+				const num = $('#numDoc').value.trim();
+				marcar('retencion', $('#tipoDoc').value === '6' && num.startsWith('20') && valor('gratuito') !== 'si' ? 'si' : 'no');
+			}
+			actualizarCondicionales();
+
+			cuotas = [];
+			if (valor('formaPago') === 'credito' && Number.isFinite(montos().neto)) {
+				$('#pendiente').value = montos().neto.toFixed(2);
+				const deIA = (d.cuotas || [])
+					.map((c) => ({ fecha: c.fecha, monto: numero(c.monto) }))
+					.filter((c) => /^\d{4}-\d{2}-\d{2}$/.test(c.fecha) && Number.isFinite(c.monto) && c.monto > 0);
+				if (deIA.length) {
+					cuotas = deIA;
+					pintarCuotas();
+					iaResaltar('pendiente');
+				} else repartirCuotas(1);
+			} else {
+				$('#pendiente').value = '';
+				pintarCuotas();
+			}
+
+			$('#confirmo').checked = false;
+			pintarChipsClientes();
+			modificado = true;
+
+			// Valida paso a paso y lleva al usuario al primero que tenga datos por completar; si todo está bien, a la revisión.
+			let destino = TOTAL_PASOS;
+			for (let n = 1; n < TOTAL_PASOS; n++) {
+				if (!(await validar(n))) {
+					destino = n;
+					break;
+				}
+			}
+			maxPaso = destino;
+			irA(destino);
+
+			$('#ia-resumen').textContent = d.resumen || 'Llenamos el formulario con los datos de tu caso.';
+			$('#ia-avisos').innerHTML = avisos.map((a) => `<li>${escapar(a)}</li>`).join('');
+			$('#ia-resultado').hidden = false;
+			toast(destino === TOTAL_PASOS ? 'Listo: revisa el recibo que llenó la IA antes de emitirlo.' : 'Llenamos lo que pudimos. Completa los datos que faltan.', 'success');
+		};
+
+		iaBoton.addEventListener('click', async () => {
+			const caso = $('#ia-caso').value.trim();
+			if (caso.length < 10) {
+				toast('Cuéntanos tu caso con un poco más de detalle.', 'error');
+				$('#ia-caso').focus();
+				return;
+			}
+			if (emitido) return;
+			iaBoton.disabled = true;
+			$('#ia-llenar-texto').textContent = 'La IA está leyendo tu caso…';
+			try {
+				const res = await fetch('/api/rhe-asistente', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ caso }),
+				});
+				const data = await res.json().catch(() => ({}));
+				if (!res.ok || !data.datos) toast(data.error || 'No pudimos procesar tu caso. Intenta de nuevo.', 'error');
+				else await aplicarIA(data.datos);
+			} catch {
+				toast('No pudimos conectar con el asistente. Revisa tu conexión.', 'error');
+			}
+			iaBoton.disabled = false;
+			$('#ia-llenar-texto').textContent = 'Llenar el recibo con IA';
+		});
 
 		document.addEventListener('click', (event) => {
 			const target = event.target instanceof Element ? event.target : null;
